@@ -1,14 +1,13 @@
-from django.http import HttpResponse
 from django.shortcuts import render
 from django.template import loader
 from .models import GENERAL_PARAMS_CLASS, ROUTE_PARAMS_CLASS, ROUTE_CLASS, OPTION_CLASS, CITY_CLASS
-from AnalysisScripts.CostResourceAnalysis import CostResourceAnalysis_Script
+from AnalysisScripts.CostResourceAnalysis import CostResourceAnalysis_AnalysisScript
 
 def CitySelection(request):
-    return HttpResponse("Hello, world. You're at the RouteDev CitySelection index.")
+    return render(request, 'RouteDev/CitySelection.html')
 
 def RouteSelection(request):
-    return HttpResponse("Hello, world. You're at the RouteDev RouteSelection index.")
+    return render(request, 'RouteDev/RouteSelection.html')
 
 def CostResourceAnalysis(request):
 
@@ -25,7 +24,7 @@ def CostResourceAnalysis(request):
         'FORECAST_YEAR': general_params.FORECAST_YEAR,
         'PRESENT_YEAR': general_params.PRESENT_YEAR
     }
-    options_list = CostResourceAnalysis_Script(general_params_dict)
+    options_list = CostResourceAnalysis_AnalysisScript(general_params_dict)
     for option_dict in options_list:
         option = OPTION_CLASS(**option_dict)
         option.ROUTE = route

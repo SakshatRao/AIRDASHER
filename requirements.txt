@@ -1,0 +1,20 @@
+# Pip install
+numpy
+pandas
+scipy
+networkx
+matplotlib
+pyvis
+odfpy
+geopy
+seaborn
+ipympl
+Django
+Pillow
+plotly
+
+# Other commands
+conda install nb_conda_kernels
+conda install ipykernel
+pip install --force-reinstall -v "openpyxl==3.1.0"
+pip install -U scikit-learn scipy matplotlib

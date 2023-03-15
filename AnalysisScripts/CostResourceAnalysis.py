@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-def CostResourceAnalysis_Script(general_params):
+def CostResourceAnalysis_AnalysisScript(general_params):
     return [
         {
             'FEASIBILITY': True,
