@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <h1>General Parameters:</h1>
+        <ul>
+            <li>{{ general_param_info.FORECAST_YEAR }}</li>
+            <li>{{ general_param_info.PRESENT_YEAR }}</li>
+        </ul>
+        <h1>Parameters:</h1>
+        <form action="{% url 'RouteDev:CostResourceAnalysis' %}" method="post">
+            {% csrf_token %}
+            <fieldset>
+                <h2>FORECAST YEAR:</h2>
+                <input type="number" name="NEW_FORECAST_YEAR" id="FORECAST_YEAR" value="{{ general_param_info.FORECAST_YEAR }}">
+            </fieldset>
+            <input type="submit" value="Submit">
+        </form>
+    </body>
+</html>
