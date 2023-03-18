@@ -13,6 +13,7 @@ class GENERAL_PARAMS_CLASS(models.Model):
     OTHER_COST = models.IntegerField()
     MIN_PROFIT_MARGIN = models.DecimalField(default = 0, max_digits = 5, decimal_places = 2)
     ANALYSIS_POINTS = models.CharField(max_length = 200)
+    SAMPLE_NAME = models.CharField(max_length = 20)
 
 class CITY_CLASS(models.Model):
     NAME = models.CharField(max_length = 30)
@@ -24,23 +25,48 @@ class CITY_CLASS(models.Model):
     ECONOMIC_GROWTH = models.IntegerField()
     EDUCATION_GROWTH = models.IntegerField()
     POPULATION_GROWTH = models.IntegerField()
+    LATITUDE = models.DecimalField(max_digits = 10, decimal_places = 6)
+    LONGITUDE = models.DecimalField(max_digits = 10, decimal_places = 6)
+    SELECTED = models.BooleanField(default = False)
 
     def __str__(self):
         return self.NAME
 
+class AIRPORT_CLASS(models.Model):
+    NAME = models.CharField(max_length = 30)
+    AIRPORT_NAME = models.CharField(max_length = 3)
+    IS_HUB = models.BooleanField(default = False)
+    LATITUDE = models.DecimalField(max_digits = 10, decimal_places = 6)
+    LONGITUDE = models.DecimalField(max_digits = 10, decimal_places = 6)
+
+    def __str__(self):
+        return self.NAME
+
+class CONNECTION_CLASS(models.Model):
+    NODE1 = models.ForeignKey(AIRPORT_CLASS, on_delete = models.CASCADE, related_name = 'node1', null = True)
+    NODE2 = models.ForeignKey(AIRPORT_CLASS, on_delete = models.CASCADE, related_name = 'node2', null = True)
+    TWO_WAY_FLIGHT = models.BooleanField(default = False)
+
 class ROUTE_CLASS(models.Model):
-    TO = models.ForeignKey(CITY_CLASS, on_delete = models.CASCADE, related_name = 'to_city')
-    FROM = models.ForeignKey(CITY_CLASS, on_delete = models.CASCADE, related_name = 'from_city')
-    DURATION = models.IntegerField()
+    CITY = models.ForeignKey(CITY_CLASS, on_delete = models.CASCADE, related_name = 'to_city', null = True)
+    AIRPORT = models.ForeignKey(AIRPORT_CLASS, on_delete = models.CASCADE, related_name = 'from_city', null = True)
+    DURATION_IN = models.IntegerField()
+    DURATION_OUT = models.IntegerField()
     DISTANCE = models.IntegerField()
+    PRESENT_DEMAND_IN = models.IntegerField()
+    PRESENT_DEMAND_OUT = models.IntegerField()
+    FORECASTED_DEMAND_IN = models.IntegerField()
+    FORECASTED_DEMAND_OUT = models.IntegerField()
     GROWTH_IN = models.DecimalField(max_digits = 6, decimal_places = 2)
     GROWTH_OUT = models.DecimalField(max_digits = 6, decimal_places = 2)
-    PRICE_IN_MARKET = models.IntegerField()
-    PRICE_OUT_MARKET = models.IntegerField()
+    GROWTH = models.DecimalField(max_digits = 6, decimal_places = 2)
+    PRICE_IN_MARKET = models.CharField(max_length = 10)
+    PRICE_OUT_MARKET = models.CharField(max_length = 10)
     NUM_IN_MARKET = models.IntegerField()
     NUM_OUT_MARKET = models.IntegerField()
-    MARKET_SHARE_IN = models.DecimalField(max_digits = 5, decimal_places = 2)
-    MARKET_SHARE_OUT = models.DecimalField(max_digits = 5, decimal_places = 2)
+    MARKET_SHARE_IN = models.DecimalField(max_digits = 5, decimal_places = 2, default = -1)
+    MARKET_SHARE_OUT = models.DecimalField(max_digits = 5, decimal_places = 2, default = -1)
+    SELECTED = models.BooleanField(default = False)
 
     def __str__(self):
         return self.FROM.NAME + "-" + self.TO.NAME

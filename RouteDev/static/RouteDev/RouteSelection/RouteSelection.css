@@ -1,0 +1,16 @@
+.RouteModal {
+    display: None;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+.modal-content-outer {
+    width: 95%;
+    margin: 2% auto;
+    background-color: green;
+}

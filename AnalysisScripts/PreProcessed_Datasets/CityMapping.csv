@@ -1,0 +1,25 @@
+City,AirRouteData_AirportCode,DomesticPassengerTraffic_City,EconomicData_District,StationCodeData_District,Airport_City_Coords,EducationData_District,PopulationAreaHousehold_District,LatestPopulation_City,PopulationHistory_District
+Ahmedabad,AMD,AHMEDABAD,,Ahmadabad,"23.073702560470423, 72.62711816841471",AHMADABAD,Ahmadabad,Ahmedabad,ahmadabad
+Bengaluru,BLR,BENGALURU,{BANGALORE URBAN + BANGALORE RURAL},Bangalore Urban,"13.199253589160458, 77.70610499457639",{BANGALORE + BANGALORE RURAL},{Bangalore + Bangalore Rural},Bengaluru,{bangalore + bangalore rural}
+Mumbai,BOM,MUMBAI,MUMBAI,Greater Bombay,"19.099282513860523, 72.87502185672862",{MUMBAI + MUMBAI SUBURBAN},{Mumbai Suburban + Mumbai},{Mumbai + Navi Mumbai},{mumbai suburban + mumbai}
+Pune,PNQ,PUNE,PUNE,Pune,"18.57956672029852, 73.90948542603986",PUNE,Pune,Pune,pune
+Chennai,MAA,CHENNAI,CHENNAI,Chennai,"12.994341981037747, 80.17159635853399",CHENNAI,Chennai,Chennai,chennai
+Hyderabad,HYD,HYDERABAD,HYDERABAD,Hyderabad,"17.240550198145755, 78.42981425116706",HYDERABAD,Hyderabad,Hyderabad,hyderabad
+Kolkata,CCU,KOLKATA,KOLKATA,Kolkata,"22.65352582802418, 88.4454727125874",KOLKATA,Kolkata,Kolkata,kolkata
+Delhi,DEL,DELHI,,Delhi,"28.55636027916676, 77.10075173170472","{2011: State: NCT OF DELHI
+2001: State: DELHI
+1991: DELHI DISTRICT}",New Delhi,Delhi,new delhi
+Visakhapatnam,VTZ,VISAKHAPATNAM,VISAKAPATNAM,Vishakhapatnam,"17.728847002566212, 83.22436286041399",VISAKHAPATNAM,Visakhapatnam,Visakhapatnam,visakhapatnam
+Guwahati,GAU,GUWAHATI,KAMRUP METROPOLITAN,Kamrup,"26.106588294514836, 91.58651886660425",KAMRUP METROPOLITAN,Kamrup Metropolitan,Guwahati,kamrup metropolitan
+Patna,PAT,PATNA,PATNA,Patna,"25.595134975944816, 85.0914824433077",PATNA,Patna,Patna,patna
+Raipur,RPR,RAIPUR,RAIPUR,Raipur,"21.186310311284696, 81.74093628188734",RAIPUR,Raipur,Raipur,raipur
+Gurugram,,,GURGAON,Gurgaon,"28.46278794067084, 77.0268258846055",GURGAON,Gurgaon,Gurgaon,gurgaon
+Shimla,,SIMLA,SHIMLA,Shimla,"31.107614458567724, 77.17275365251822",SHIMLA,Shimla,Shimla,shimla
+Jamshedpur,,,SINGHBHUM: EAST,Purba Singhbhum,"22.806168678961996, 86.20426443596207",PURBI SINGHBHUM,Purbi Singhbhum,Jamshedpur,purbi singhbhum
+Thiruvananthapuram,TRV,TRIVANDRUM,THIRUVANANTHAPURAM,Thiruvananthapuram,"8.483674768556643, 76.92018417811046",THIRUVANANTHAPURAM,Thiruvananthapuram,Thiruvananthapuram,thiruvananthapuram
+Bhopal,BHO,BHOPAL,BHOPAL,Bhopal,"23.29115923886414, 77.33623544143026",BHOPAL,Bhopal,Bhopal,bhopal
+Bhubaneswar,BBI,BHUBANESWAR,KHORDHA,Khorda,"20.250853202498476, 85.81503232420685",KHORDHA,Khordha ,Bhubaneshwar,khordha
+Amritsar,ATQ,AMRITSAR,AMRITSAR,Amritsar,"31.70590323833117, 74.80741156853834",AMRITSAR,Amritsar ,Amritsar,amritsar
+Jaipur,JAI,JAIPUR,JAIPUR,Jaipur,"26.8292889452682, 75.80503844073401",JAIPUR,Jaipur,Jaipur,jaipur
+Lucknow,LKO,LUCKNOW,LUCKNOW,Lucknow,"26.76204781072984, 80.88634164332352",LUCKNOW,Lucknow,Lucknow,lucknow
+Dehradun,DED,DEHRA DUN,DEHRADUN,Dehra Dun,"30.19527297854567, 78.19269801269097",DEHRADUN,Dehradun,Dehra Dun,dehradun
