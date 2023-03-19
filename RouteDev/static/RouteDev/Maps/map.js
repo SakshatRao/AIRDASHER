@@ -57,8 +57,8 @@ var MAPS_PLOT = MAPS_PLOT || (function(){
                     line_info = {
                         'color': 'white',
                         'weight': 1.5,
-                        'opacity': 1,
-                        'dashArray': "4 1"
+                        'opacity': 0.5,
+                        'dashArray': "10 1"
                     };
                 }
                 var polyline = L.polyline(polylinePoints, line_info);
@@ -101,7 +101,7 @@ var MAPS_PLOT = MAPS_PLOT || (function(){
                 var circle_info = {};
                 circle_info = {
                     fillColor: 'blue',
-                    fillOpacity: 0.5,
+                    fillOpacity: 1,
                     radius: 70000
                 };
                 var circle = L.circle([lat_lon[0], lat_lon[1]], circle_info);
@@ -119,7 +119,7 @@ var MAPS_PLOT = MAPS_PLOT || (function(){
             overlays['Highest-growth Cities'] = new_cities_layer;
 
             if (show_network == 1) {
-                valid_layers = [tile_layer, new_cities_layer, network_layer]
+                valid_layers = [tile_layer, network_layer, new_cities_layer]
             }
             else {
                 valid_layers = [tile_layer, new_cities_layer]
@@ -128,7 +128,7 @@ var MAPS_PLOT = MAPS_PLOT || (function(){
                 center: [22, 85],
                 zoom: 5,
                 layers: valid_layers
-            }).setView([22, 85], 5);
+            });
 
             var LayerControl = L.control.layers({}, overlays);
             LayerControl.addTo(map);

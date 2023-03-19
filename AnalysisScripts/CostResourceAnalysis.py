@@ -1,22 +1,24 @@
 import numpy as np
 import pandas as pd
 
-def CostResourceAnalysis_Script(selected_route, general_params, route_params, preprocessor, output_save_path):
+import time
+
+def CostResourceAnalysis_Script(selected_route, general_params, route_params, preprocessor, output_save_path, plotly_save_path):
 
     PRESENT_YEAR = general_params['PRESENT_YEAR']
     FORECAST_YEAR = general_params['FORECAST_YEAR']
     INFLATION_RATE = general_params['INFLATION_RATE']
     CAPACITY_NARROWBODY = general_params['CAPACITY_NARROWBODY']
     CAPACITY_TURBOPROP = general_params['CAPACITY_TURBOPROP']
-    FIXED_COSTS = general_params['FIXED_COSTS']
-    OPERATING_COSTS = general_params['OPERATING_COSTS']
-    OTHER_COSTS = general_params['OTHER_COSTS']
-    PROFIT_MARGIN = general_params['PROFIT_MARGIN']
-    MARKET_SHARE_PRICE_FACTOR = general_params['MARKET_SHARE_PRICE_FACTOR']
+    FIXED_COSTS = general_params['FIXED_COST']
+    OPERATING_COSTS = general_params['OPERATING_COST']
+    OTHER_COSTS = general_params['OTHER_COST']
+    PROFIT_MARGIN = general_params['MIN_PROFIT_MARGIN']
+    MARKET_SHARE_PRICE_FACTOR = 4
     FLEET_NARROWBODY = general_params['FLEET_NARROWBODY']
     FLEET_TURBOPROP = general_params['FLEET_TURBOPROP']
-    TOP_N_COMBO = general_params['TOP_N_COMBO']
-    analysis_points = general_params['analysis_points']
+    TOP_N_COMBO = 3
+    analysis_points = general_params['ANALYSIS_POINTS']
 
     PRICE_IN = route_params['PRICE_IN']
     PRICE_OUT = route_params['PRICE_OUT']
@@ -72,22 +74,7 @@ def CostResourceAnalysis_Script(selected_route, general_params, route_params, pr
         
         years = np.arange(PRESENT_YEAR + 1, FORECAST_YEAR + 1)
         PROFIT_MARGIN_LIST = (np.cumsum(EARNINGS) - np.cumsum(EXPENSES)) / (np.cumsum(EARNINGS)) * 100
-        
-        if(check_cost_equation(FIXED_COSTS, OPERATING_COSTS, OTHER_COSTS)[1] == False):
-            feasibility = False
-            return feasibility, {
-                'years': years,
-                'EXPENSES': EXPENSES,
-                'EARNINGS': EARNINGS,
-                'PROFIT_MARGIN_LIST': PROFIT_MARGIN_LIST,
-                'total_demands': None,
-                'total_capacities': None,
-                'total_flight_vacancies': None,
-                'profitability_year': None
-            }
-        
-        profitability_year = years[np.where(PROFIT_MARGIN_LIST > 0)[0][0]] - 1
-        
+
         total_demands = []
         total_capacities = []
         total_flight_vacancies = []
@@ -98,6 +85,21 @@ def CostResourceAnalysis_Script(selected_route, general_params, route_params, pr
             total_demands.append(total_demand)
             total_capacities.append(total_capacity)
             total_flight_vacancies.append(1 - (total_demand / total_capacity))
+        
+        if(check_cost_equation(FIXED_COSTS, OPERATING_COSTS, OTHER_COSTS)[1] == False):
+            feasibility = False
+            return feasibility, {
+                'years': years,
+                'EXPENSES': EXPENSES,
+                'EARNINGS': EARNINGS,
+                'PROFIT_MARGIN_LIST': PROFIT_MARGIN_LIST,
+                'total_demands': total_demands,
+                'total_capacities': total_capacities,
+                'total_flight_vacancies': total_flight_vacancies,
+                'profitability_year': None
+            }
+        
+        profitability_year = years[np.where(PROFIT_MARGIN_LIST > 0)[0][0]] - 1
         
         return feasibility, {
             'years': years,
@@ -300,7 +302,7 @@ def CostResourceAnalysis_Script(selected_route, general_params, route_params, pr
             feasibility, cost_resource_analysis = get_cost_resource_analysis(num_planes, addition_planes, forecasts, PRICE_IN, PRICE_OUT, MARKET_SHARE_IN, MARKET_SHARE_OUT, duration_in, duration_out)
             combo_info.append({'num_planes': num_planes, 'feasibility': feasibility, 'cost_resource_analysis': cost_resource_analysis})
         
-        combo_info = list(sorted(combo_info, key = lambda x: x['cost_resource_analysis']['PROFIT_MARGIN_LIST'][-1], reverse = True))[:5]
+        combo_info = list(sorted(combo_info, key = lambda x: x['cost_resource_analysis']['PROFIT_MARGIN_LIST'][-1], reverse = True))[:3]
         
         return {'Solutions': combo_info, 'OtherInfo': {
             'MARKET_SHARE_IN': MARKET_SHARE_IN,
@@ -350,9 +352,60 @@ def CostResourceAnalysis_Script(selected_route, general_params, route_params, pr
         trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['EXPENSES'] = trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['EXPENSES'][-1]
         trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['EARNINGS'] = trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['EARNINGS'][-1]
         trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['PROFIT_MARGIN_LIST'] = trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['PROFIT_MARGIN_LIST'][-1]
-        if(trimmed_route_info['Solutions'][solution_idx]['feasibility'] == True):
-            trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['total_demands'] = trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['total_demands'][-1]
-            trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['total_capacities'] = trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['total_capacities'][-1]
-            trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['total_flight_vacancies'] = trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['total_flight_vacancies'][-1]
+        trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['total_demands'] = trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['total_demands'][-1]
+        trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['total_capacities'] = trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['total_capacities'][-1]
+        trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['total_flight_vacancies'] = trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['total_flight_vacancies'][-1]
+        # if(trimmed_route_info['Solutions'][solution_idx]['feasibility'] == True):
+        #     pass
 
     return trimmed_route_info
+
+# # Testing
+# from CitySelection import CitySelection_Script
+# from RouteSelection import RouteSelection_Script
+
+# tier_1_2_cities = [
+#     'Ahmedabad', 'Bengaluru', 'Mumbai', 'Pune', 'Chennai', 'Hyderabad', 'Kolkata', 'Delhi', 'Visakhapatnam', 'Guwahati', 'Patna',
+#     'Raipur', 'Gurugram', 'Shimla', 'Jamshedpur', 'Thiruvananthapuram', 'Bhopal', 'Bhubaneswar', 'Amritsar', 'Jaipur', 'Lucknow', 'Dehradun'
+# ]
+
+# from PreProcessor import PreProcessor
+# t1 = time.time()
+# preprocessor = PreProcessor(tier_1_2_cities, "./PreProcessed_Datasets")
+# print(f"Time taken for preprocessor: {(time.time() - t1):.2f}s")
+
+# general_params = {
+#     'PRESENT_YEAR': 2023,
+#     'FORECAST_YEAR': 2033,
+#     'SAMPLE_NAME': 'Sample1',
+#     'INFLATION_RATE': 7,
+#     'CAPACITY_NARROWBODY': 300,
+#     'CAPACITY_TURBOPROP': 100,
+#     'FLEET_NARROWBODY': 3,
+#     'FLEET_TURBOPROP': 3,
+#     'FIXED_COST': 1000000,
+#     'OPERATING_COST': 1000,
+#     'OTHER_COST': 1000000,
+#     'MIN_PROFIT_MARGIN': 10,
+#     'MARKET_SHARE_PRICE_FACTOR': 4,
+#     'TOP_N_COMBO': 3,
+#     'ANALYSIS_POINTS': [3, 5, 7]
+# }
+# route_params = {
+#     'PRICE_IN': 60,
+#     'PRICE_OUT': 60
+# }
+
+# most_growth_cities, airports = CitySelection_Script(general_params, preprocessor, tier_1_2_cities, './Final_Analysis_Scripts/Temporary_Outputs', './Final_Analysis_Scripts/Temporary_Outputs')
+
+# for idx in range(10):
+#     selected_city = [x for x in most_growth_cities][np.random.randint(len(most_growth_cities))]
+#     print(selected_city)
+#     most_growth_routes = RouteSelection_Script(selected_city, airports, general_params, preprocessor, tier_1_2_cities, './Final_Analysis_Scripts/Temporary_Outputs', './Final_Analysis_Scripts/Temporary_Outputs')
+
+#     selected_route = [(x, most_growth_routes[x]) for x in most_growth_routes][np.random.randint(len(most_growth_routes))]
+#     print(selected_route[1])
+#     selected_route = selected_route[1]
+#     options_info = CostResourceAnalysis_Script(selected_route, general_params, route_params, preprocessor, './Final_Analysis_Scripts/Temporary_Outputs', './Final_Analysis_Scripts/Temporary_Outputs')
+#     print(options_info)
+#     print("\n\n\n")

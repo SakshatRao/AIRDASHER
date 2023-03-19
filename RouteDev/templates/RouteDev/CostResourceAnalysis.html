@@ -1,22 +1,95 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html>
     <head>
+        <title>Cost & Resource Analysis</title>
+
+        <link rel="stylesheet" href="{% static 'RouteDev/CostResourceAnalysis/CostResourceAnalysis.css' %}">
         
+        <!-- Plotly JS -->
+        <script src="https://cdn.plot.ly/plotly-2.18.2.min.js"></script>
     </head>
     <body>
-        <h1>General Parameters:</h1>
-        <ul>
-            <li>{{ general_param_info.FORECAST_YEAR }}</li>
-            <li>{{ general_param_info.PRESENT_YEAR }}</li>
-        </ul>
-        <h1>Parameters:</h1>
+        <h1>FEASIBILITY OF NEW ROUTE</h1>
+        {% for option, option_total_planes, option_plane_addition_info in options_info %}
+            <div id="Option{{ forloop.counter }}" class="OptionOuterBox">
+                <h1>Option {{ forloop.counter }}</h1>
+                <h3>PROFT MARGIN: {{ option.PROFIT_MARGIN }}%</h3>
+                <h3>{{ option_total_planes.0 }} Narrowbody + {{ option_total_planes.1 }} Turboprop</h3>
+            </div>
+            <div id="OptionModal{{ forloop.counter }}" class="OptionModal">
+                <div class="modal-content-outer">
+                    <span class="close" id="close{{ forloop.counter }}">&times;</span>
+                    <div>
+                        <h1>Option {{ forloop.counter }}</h1>
+                        {% if option.FEASIBLE == True %}
+                            <h2>Feasible</h2>
+                        {% else %}
+                            <h2>Not Feasible</h2>
+                        {% endif %}
+                        <h3>{{ option_total_planes.0 }} Narrowbody + {{ option_total_planes.1 }} Turboprop</h3>
+                        {% for addition in option_plane_addition_info %}
+                            <h4>{{ addition.0 }}: +{{ addition.1 }} Narrowbody, +{{ addition.2 }} Turboprop</h4>
+                        {% endfor %}
+                        <iframe src="{% static 'RouteDev/CostDemand.html' %}" frameborder="0" width="100%" height="800px"></iframe>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
         <form action="{% url 'RouteDev:CostResourceAnalysis' %}" method="post">
             {% csrf_token %}
             <fieldset>
-                <h2>FORECAST YEAR:</h2>
-                <input type="number" name="NEW_FORECAST_YEAR" id="FORECAST_YEAR" value="{{ general_param_info.FORECAST_YEAR }}">
+                <h2>Price Selection</h2>
+                <div>
+                    <h3>{{ selected_route_info.AIRPORT.AIRPORT_NAME }}-{{ selected_route_info.CITY.AIRPORT_NAME }}</h3>
+                    <div class="slidecontainer">
+                        <input type="range" name="NEW_PRICE_IN" min="{{ min_price_in }}" max="{{ max_price_in }}" value="{{ route_param_info.PRICE_IN }}" class="slider" id="price_in_slider">
+                        <p>Selected Value: <span id="selected_price_in"></span></p>
+                    </div>
+                    <h4>{{ selected_route_info.PRICE_IN_MARKET }}</h4>
+                </div>
+                <div>
+                    <h3>{{ selected_route_info.CITY.AIRPORT_NAME }}-{{ selected_route_info.AIRPORT.AIRPORT_NAME }}</h3>
+                    <div class="slidecontainer">
+                        <input type="range" name="NEW_PRICE_OUT" min="{{ min_price_out }}" max="{{ max_price_out }}" value="{{ route_param_info.PRICE_OUT }}" class="slider" id="price_out_slider">
+                        <p>Selected Value: <span id="selected_price_out"></span></p>
+                    </div>
+                    <h4>{{ selected_route_info.PRICE_OUT_MARKET }}</h4>
+                </div>
             </fieldset>
-            <input type="submit" value="Submit">
+            <fieldset>
+                <h2>Cost Parameters</h2>
+                <h3>Total Fixed Costs for Turboprop:</h3>
+                <input type="number" name="NEW_FIXED_COST" value="{{ general_param_info.FIXED_COST }}" id="FIXED_COST">
+                <h3>Total Operating Costs for Turboprop per hour:</h3>
+                <input type="number" name="NEW_OPERATING_COST" value="{{ general_param_info.OPERATING_COST }}" id="OPERATING_COST">
+                <h3>Total Other Costs:</h3>
+                <input type="number" name="NEW_OTHER_COST" value="{{ general_param_info.OTHER_COST }}" id="OTHER_COST">
+                <h3>Minimum Profit Margin Expected:</h3>
+                <input type="number" name="NEW_MIN_PROFIT_MARGIN" value="{{ general_param_info.MIN_PROFIT_MARGIN }}" id="MIN_PROFIT_MARGIN">
+            </fieldset>
+            <fieldset>
+                <h2>FLEET PARAMETERS:</h2>
+                <h3>CAPACITY:</h3>
+                <input type="number" name="NEW_CAPACITY_NARROWBODY" value="{{ general_param_info.CAPACITY_NARROWBODY }}" id="CAPACITY_NARROWBODY">
+                <h3>AVAILABILITY:</h3>
+                <input type="number" name="NEW_FLEET_NARROWBODY" value="{{ general_param_info.FLEET_NARROWBODY }}" id="FLEET_NARROWBODY">
+                <h3>CAPACITY:</h3>
+                <input type="number" name="NEW_CAPACITY_TURBOPROP" value="{{ general_param_info.CAPACITY_TURBOPROP }}" id="CAPACITY_TURBOPROP">
+                <h3>AVAILABILITY:</h3>
+                <input type="number" name="NEW_FLEET_TURBOPROP" value="{{ general_param_info.FLEET_TURBOPROP }}" id="FLEET_TURBOPROP">
+            </fieldset>
+            <fieldset>
+                <h2>Other Parameters</h2>
+                <h3>ANALYSIS POINTS:</h3>
+                <input type="text" name="NEW_ANALYSIS_POINTS" value="{{ general_param_info.ANALYSIS_POINTS }}" id="ANALYSIS_POINTS">
+                <h3>INFLATION RATE:</h3>
+                <input type="number" name="NEW_INFLATION_RATE" value="{{ general_param_info.INFLATION_RATE }}" id="INFLATION_RATE">
+            </fieldset>
+            <input type="submit" name="PARAMS_UPDATE" value="Submit">
         </form>
+        <script src="{% static 'RouteDev/CostResourceAnalysis/CostResourceAnalysis.js' %}"></script>
     </body>
 </html>

@@ -9,8 +9,8 @@
         <!-- Leaflet JS -->
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin=""/>
         <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
-
         <link rel="stylesheet" href="{% static 'RouteDev/Maps/map.css' %}">
+
         <link rel="stylesheet" href="{% static 'RouteDev/CitySelection/CitySelection.css' %}">
         
         <!-- Plotly JS -->
@@ -51,7 +51,7 @@
         {% for city in cities_info %}
             <div id="City{{ forloop.counter }}" class="CityOuterBox">
                 <h1>{{ city.NAME }}</h1>
-                <h3>GROWTH RATE: {{ city.GROWTH_RATE }}%</h2>
+                <h3>GROWTH RATE: {{ city.GROWTH_RATE }}%</h3>
             </div>
             <div id="CityModal{{ forloop.counter }}" class="CityModal">
                 <div class="modal-content-outer">

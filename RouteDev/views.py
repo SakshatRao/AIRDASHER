@@ -2,8 +2,11 @@ from django.shortcuts import render, redirect
 from django.template import loader
 from .models import GENERAL_PARAMS_CLASS, ROUTE_PARAMS_CLASS, ROUTE_CLASS, OPTION_CLASS, CITY_CLASS, AIRPORT_CLASS, CONNECTION_CLASS
 
+import ast
+
 from AnalysisScripts.CitySelection import CitySelection_Script
 from AnalysisScripts.RouteSelection import RouteSelection_Script
+from AnalysisScripts.CostResourceAnalysis import CostResourceAnalysis_Script
 from AnalysisScripts.PreProcessor import PreProcessor, Airport
 
 tier_1_2_cities = [
@@ -192,28 +195,176 @@ def RouteSelection(request):
 
 def CostResourceAnalysis(request):
 
-    general_params = GENERAL_PARAMS_CLASS.objects.all()[0]
-    route = ROUTE_CLASS.objects.all()[0]
-
-    # For updating parameters
-    if(request.method == 'POST'):
-        NEW_FORECAST_YEAR = request.POST['NEW_FORECAST_YEAR']
-        general_params.FORECAST_YEAR = NEW_FORECAST_YEAR
-        general_params.save()
+    def convert_market_price_to_int(price_str):
+        if(price_str == 'N/A'):
+            return -1 #Don't care
+        else:
+            return int(''.join(price_str[1:]))
     
-    general_params_dict = {
-        'FORECAST_YEAR': general_params.FORECAST_YEAR,
-        'PRESENT_YEAR': general_params.PRESENT_YEAR
-    }
-    # options_list = CostResourceAnalysis_AnalysisScript(general_params_dict)
-    # for option_dict in options_list:
-    #     option = OPTION_CLASS(**option_dict)
-    #     option.ROUTE = route
-    #     print(option)
-    # print("Saved all options")
+    if(request.method == 'POST'):
 
-    assert(len(GENERAL_PARAMS_CLASS.objects.all()) == 1)
-    context = {
-        'general_param_info': general_params
+        if('PARAMS_UPDATE' in request.POST):
+
+            general_params = GENERAL_PARAMS_CLASS.objects.all()[0]            
+            general_params.CAPACITY_NARROWBODY = request.POST['NEW_CAPACITY_NARROWBODY']
+            general_params.CAPACITY_TURBOPROP = request.POST['NEW_CAPACITY_TURBOPROP']
+            general_params.FLEET_NARROWBODY = request.POST['NEW_FLEET_NARROWBODY']
+            general_params.FLEET_TURBOPROP = request.POST['NEW_FLEET_TURBOPROP']
+            general_params.INFLATION_RATE = request.POST['NEW_INFLATION_RATE']
+            general_params.FIXED_COST = request.POST['NEW_FIXED_COST']
+            general_params.OPERATING_COST = request.POST['NEW_OPERATING_COST']
+            general_params.OTHER_COST = request.POST['NEW_OTHER_COST']
+            general_params.MIN_PROFIT_MARGIN = request.POST['NEW_MIN_PROFIT_MARGIN']
+            general_params.ANALYSIS_POINTS = request.POST['NEW_ANALYSIS_POINTS']
+            general_params.save()
+
+            route_params = ROUTE_PARAMS_CLASS.objects.all()[0]
+            route_params.PRICE_IN = request.POST['NEW_PRICE_IN']
+            route_params.PRICE_OUT = request.POST['NEW_PRICE_OUT']
+            print("DEBUG3: ", request.POST['NEW_PRICE_IN'])
+            print("DEBUG4: ", request.POST['NEW_PRICE_OUT'])
+            route_params.save()
+        
+        else:
+            selected_route_name = [x for x in request.POST if x.startswith('SELECTED_ROUTE_')]
+            assert(len(selected_route_name) <= 1)
+
+            if(len(selected_route_name) == 1):
+                selected_city_name, selected_hub_name = selected_route_name[0].split('_')[-2:]
+                selected_route_name = selected_city_name + '_' + selected_hub_name
+                selected_route = ROUTE_CLASS.objects.filter(CITY__NAME = selected_city_name, AIRPORT__AIRPORT_NAME = selected_hub_name)
+                assert(len(selected_route) == 1)
+                selected_route = selected_route[0]
+
+                prev_selected_route = ROUTE_CLASS.objects.filter(SELECTED = True)
+                assert(len(prev_selected_route) <= 1)
+                if(len(prev_selected_route) == 1):
+                    prev_selected_route = prev_selected_route[0]
+                    prev_selected_route_name = prev_selected_route.CITY.NAME + '_' + prev_selected_route.AIRPORT.AIRPORT_NAME
+                    if((prev_selected_route.CITY.NAME != selected_city_name) | (prev_selected_route.AIRPORT.AIRPORT_NAME != selected_hub_name)):
+                        prev_selected_route.SELECTED = False
+                        prev_selected_route.save()
+                else:
+                    prev_selected_route_name = ''
+                selected_route.SELECTED = True
+                selected_route.save()
+
+                if(prev_selected_route_name != selected_route_name):
+
+                    selected_route_info = {
+                        'City': selected_route.CITY.NAME,
+                        'Hub': selected_route.AIRPORT.AIRPORT_NAME,
+                        'IncomingFlightDuration': selected_route.DURATION_IN,
+                        'OutgoingFlightDuration': selected_route.DURATION_OUT,
+                        'PresentYearInForecast': selected_route.PRESENT_DEMAND_IN,
+                        'PresentYearOutForecast': selected_route.PRESENT_DEMAND_OUT,
+                        'ForecastYearInForecast': selected_route.FORECASTED_DEMAND_IN,
+                        'ForecastYearOutForecast': selected_route.FORECASTED_DEMAND_OUT,
+                        'NUMBER_PLANES_OUT_MARKET': selected_route.NUM_OUT_MARKET,
+                        'NUMBER_PLANES_IN_MARKET': selected_route.NUM_IN_MARKET,
+                        'PRICE_OUT_MARKET': convert_market_price_to_int(selected_route.PRICE_OUT_MARKET),
+                        'PRICE_IN_MARKET': convert_market_price_to_int(selected_route.PRICE_IN_MARKET),
+                        'DISTANCE': selected_route.DISTANCE,
+                        'GrowthIn': selected_route.GROWTH_IN,
+                        'GrowthOut': selected_route.GROWTH_OUT,
+                        'AvgGrowth': selected_route.GROWTH
+                    }
+                    general_params = GENERAL_PARAMS_CLASS.objects.all()[0]
+                    general_params_info = general_params.__dict__
+                    general_params_info['ANALYSIS_POINTS'] = ast.literal_eval(general_params_info['ANALYSIS_POINTS'])
+                    route_params = ROUTE_PARAMS_CLASS.objects.all()[0]
+                    global tier_1_2_cities
+                    preprocessor = PreProcessor(tier_1_2_cities, './AnalysisScripts/PreProcessed_Datasets')
+                    options = CostResourceAnalysis_Script(
+                        selected_route_info,
+                        general_params.__dict__, route_params.__dict__,
+                        preprocessor,
+                        './AnalysisScripts/PreProcessed_Datasets',
+                        './AnalysisScripts/PreProcessed_Datasets'
+                    )
+
+                    selected_route.MARKET_SHARE_IN = options['OtherInfo']['MARKET_SHARE_IN']
+                    selected_route.MARKET_SHARE_OUT = options['OtherInfo']['MARKET_SHARE_OUT']
+                    selected_route.save()
+
+                    OPTION_CLASS.objects.all().delete()
+                    for option_idx, option in enumerate(options['Solutions']):
+                        option_object = OPTION_CLASS(
+                            FEASIBILITY = option['feasibility'],
+                            NUM_PLANES = str(option['num_planes']),
+                            ROUTE = selected_route,
+                            DEMAND = option['cost_resource_analysis']['total_demands'],
+                            CAPACITY = option['cost_resource_analysis']['total_capacities'],
+                            EXPENSES = option['cost_resource_analysis']['EXPENSES'],
+                            EARNINGS = option['cost_resource_analysis']['EARNINGS'],
+                            PROFIT_MARGIN = option['cost_resource_analysis']['PROFIT_MARGIN_LIST'],
+                            PROFITABILITY_YEAR = str(option['cost_resource_analysis']['profitability_year']),
+                            OCCUPANCY_RATE = option['cost_resource_analysis']['total_flight_vacancies'],
+                            RANK = option_idx + 1
+                        )
+                        option_object.save()
+                    
+                    route_params = ROUTE_PARAMS_CLASS.objects.all()[0]
+                    route_params.PRICE_IN = convert_market_price_to_int(selected_route.PRICE_IN_MARKET)
+                    route_params.PRICE_OUT = convert_market_price_to_int(selected_route.PRICE_OUT_MARKET)
+                    route_params.ROUTE = selected_route
+                    route_params.save()
+            else:
+                return redirect('RouteDev:CitySelection')
+    
+    else:
+        return redirect('RouteDev:CitySelection')         
+
+    general_params = GENERAL_PARAMS_CLASS.objects.all()[0]
+    selected_route = ROUTE_CLASS.objects.filter(SELECTED = True)[0]
+    options = OPTION_CLASS.objects.all()
+    options_total_planes_info = [ast.literal_eval(x.NUM_PLANES)[-1] for x in options]
+    options_num_planes = [ast.literal_eval(x.NUM_PLANES) for x in options]
+    options_plane_addition_info = []
+    for option_num_planes in options_num_planes:
+        option_plane_addition = [[general_params.PRESENT_YEAR + 1, option_num_planes[0][0], option_num_planes[0][1]]]
+        for option_num_planes_idx in range(1, len(option_num_planes)):
+            diff_num_narrowbody_planes = option_num_planes[option_num_planes_idx][0] - option_num_planes[option_num_planes_idx - 1][0]
+            diff_num_turboprop_planes = option_num_planes[option_num_planes_idx][1] - option_num_planes[option_num_planes_idx - 1][1]
+            if((diff_num_narrowbody_planes != 0) | (diff_num_turboprop_planes != 0)):
+                option_plane_addition.append([general_params.PRESENT_YEAR + option_num_planes_idx + 1, diff_num_narrowbody_planes, diff_num_turboprop_planes])
+        options_plane_addition_info.append(option_plane_addition)
+    
+    route_params = ROUTE_PARAMS_CLASS.objects.all()[0]
+    selected_route_price_in = route_params.PRICE_IN
+    selected_route_price_out = route_params.PRICE_OUT
+    selected_route_price_in_market = convert_market_price_to_int(selected_route.PRICE_IN_MARKET)
+    selected_route_price_out_market = convert_market_price_to_int(selected_route.PRICE_OUT_MARKET)
+    if((selected_route_price_in == -1) & (selected_route_price_out == -1)):
+        selected_route_price_in_min = 0; selected_route_price_in = 100; selected_route_price_in_max = 200
+        selected_route_price_out_min = 0; selected_route_price_out = 100; selected_route_price_out_max = 200
+    else:
+        if(selected_route_price_in == -1):
+            selected_route_price_in_min = 0; selected_route_price_in = 100; selected_route_price_in_max = 200
+            selected_route_price_out_min = selected_route_price_out_market // 2; selected_route_price_out_max = selected_route_price_out_market * 3 // 2
+        elif(selected_route_price_out == -1):
+            selected_route_price_out_min = 0; selected_route_price_out = 100; selected_route_price_out_max = 200
+            selected_route_price_in_min = selected_route_price_in_market // 2; selected_route_price_in_max = selected_route_price_in_market * 3 // 2
+        else:
+            selected_route_price_in_min = selected_route_price_in_market // 2; selected_route_price_in_max = selected_route_price_in_market * 3 // 2
+            selected_route_price_out_min = selected_route_price_out_market // 2; selected_route_price_out_max = selected_route_price_out_market * 3 // 2
+    other_param_options = {
+        'min_price_in': selected_route_price_in_min,
+        'max_price_in': selected_route_price_in_max,
+        'min_price_out': selected_route_price_out_min,
+        'max_price_out': selected_route_price_out_max
     }
+    route_params.PRICE_IN = selected_route_price_in
+    route_params.PRICE_OUT - selected_route_price_out
+    route_params.save()
+    
+    context = {
+        'general_param_info': general_params,
+        'route_param_info': route_params,
+        'selected_route_info': selected_route,
+        'options_info': zip(options, options_total_planes_info, options_plane_addition_info),
+        **other_param_options
+    }
+    print(context)
+    print(route_params.PRICE_IN)
     return render(request, 'RouteDev/CostResourceAnalysis.html', context)

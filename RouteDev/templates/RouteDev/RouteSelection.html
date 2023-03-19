@@ -8,8 +8,8 @@
         <!-- Leaflet JS -->
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin=""/>
         <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
-
         <link rel="stylesheet" href="{% static 'RouteDev/Maps/map.css' %}">
+        
         <link rel="stylesheet" href="{% static 'RouteDev/RouteSelection/RouteSelection.css' %}">
         
         <!-- Plotly JS -->
@@ -41,7 +41,7 @@
         {% for route in routes_info %}
             <div id="Route{{ forloop.counter }}" class="RouteOuterBox">
                 <h1>{{ route.CITY.NAME }} &#x21D4; {{ route.AIRPORT.NAME }}</h1>
-                <h3>AVG GROWTH RATE: {{ route.GROWTH }}%</h2>
+                <h3>AVG GROWTH RATE: {{ route.GROWTH }}%</h3>
             </div>
             <div id="RouteModal{{ forloop.counter }}" class="RouteModal">
                 <div class="modal-content-outer">
@@ -54,7 +54,7 @@
                         <h3>{{ route.PRICE_IN_MARKET }}, {{ route.NUM_IN_MARKET }} - {{ route.PRICE_OUT_MARKET }}, {{ route.NUM_OUT_MARKET }}</h3>
                         <form action="{% url 'RouteDev:CostResourceAnalysis' %}" method="post">
                             {% csrf_token %}
-                            <button name="SELECTED_ROUTE_{{ route.CITY.NAME }}_{{ route.AIRPORT.NAME }}">SELECT ROUTE</button>
+                            <button name="SELECTED_ROUTE_{{ route.CITY.NAME }}_{{ route.AIRPORT.AIRPORT_NAME }}">SELECT ROUTE</button>
                         </form>
                         <iframe src="{% static 'RouteDev/CostDemand.html' %}" frameborder="0" width="100%" height="800px"></iframe>
                     </div>
