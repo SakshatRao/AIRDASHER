@@ -29,6 +29,6 @@ def CitySelection_GraphingScript(cities):
 
     fig = go.Figure(data = data, layout = layout)
     THIS_FOLDER = Path(__file__).parent.resolve()
-    pyo.plot(fig, filename = f"{THIS_FOLDER}/RouteDev/static/RouteDev/CostDemand.html", auto_open = False, output_type = 'file', include_plotlyjs = 'cdn')
+    pyo.plot(fig, filename = f"{THIS_FOLDER}/../RouteDev/static/RouteDev/CostDemand.html", auto_open = False, output_type = 'file', include_plotlyjs = 'cdn')
 
 CitySelection_GraphingScript([])

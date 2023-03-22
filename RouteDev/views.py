@@ -38,12 +38,12 @@ def CitySelection(request):
 
             global tier_1_2_cities
             THIS_FOLDER = Path(__file__).parent.resolve()
-            preprocessor = PreProcessor(tier_1_2_cities, f'{THIS_FOLDER}/AnalysisScripts/PreProcessed_Datasets')
+            preprocessor = PreProcessor(tier_1_2_cities, f'{THIS_FOLDER}/../AnalysisScripts/PreProcessed_Datasets')
             cities, airports = CitySelection_Script(
                 general_params.__dict__,
                 preprocessor, tier_1_2_cities,
-                f'{THIS_FOLDER}/RouteDev/static/RouteDev/ProcessingOutputs',
-                f'{THIS_FOLDER}/RouteDev/static/RouteDev/ProcessingOutputs'
+                f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs',
+                f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs'
             )
 
             CITY_CLASS.objects.all().delete()
@@ -147,13 +147,13 @@ def RouteSelection(request):
             general_params = GENERAL_PARAMS_CLASS.objects.all()[0]
             global tier_1_2_cities
             THIS_FOLDER = Path(__file__).parent.resolve()
-            preprocessor = PreProcessor(tier_1_2_cities, f'{THIS_FOLDER}/AnalysisScripts/PreProcessed_Datasets')
+            preprocessor = PreProcessor(tier_1_2_cities, f'{THIS_FOLDER}/../AnalysisScripts/PreProcessed_Datasets')
             routes = RouteSelection_Script(
                 selected_city_name, AIRPORT_dict,
                 general_params.__dict__,
                 preprocessor, tier_1_2_cities,
-                f'{THIS_FOLDER}/RouteDev/static/RouteDev/ProcessingOutputs',
-                f'{THIS_FOLDER}/RouteDev/static/RouteDev/ProcessingOutputs'
+                f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs',
+                f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs'
             )
             
             ROUTE_CLASS.objects.all().delete()
@@ -390,13 +390,13 @@ def CostResourceAnalysis(request):
             
             global tier_1_2_cities
             THIS_FOLDER = Path(__file__).parent.resolve()
-            preprocessor = PreProcessor(tier_1_2_cities, f'{THIS_FOLDER}/AnalysisScripts/PreProcessed_Datasets')
+            preprocessor = PreProcessor(tier_1_2_cities, f'{THIS_FOLDER}/../AnalysisScripts/PreProcessed_Datasets')
             options = CostResourceAnalysis_Script(
                 selected_route_info,
                 general_params.__dict__, route_params.__dict__,
                 preprocessor,
-                f'{THIS_FOLDER}/RouteDev/static/RouteDev/ProcessingOutputs',
-                f'{THIS_FOLDER}/RouteDev/static/RouteDev/ProcessingOutputs'
+                f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs',
+                f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs'
             )
             print(options)
 
