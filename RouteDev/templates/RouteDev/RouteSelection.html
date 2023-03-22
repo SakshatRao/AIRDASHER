@@ -10,58 +10,73 @@
         <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
         <link rel="stylesheet" href="{% static 'RouteDev/Maps/map.css' %}">
         
+        <link rel="stylesheet" href="{% static 'HomePage/colors.css' %}">
         <link rel="stylesheet" href="{% static 'RouteDev/RouteSelection/RouteSelection.css' %}">
         
         <!-- Plotly JS -->
         <script src="https://cdn.plot.ly/plotly-2.18.2.min.js"></script>
     </head>
     <body>
-        <div id="map"></div>
-        <script src="{% static 'RouteDev/Maps/map.js' %}"></script>
-        {% for airport in airports_info %}
-            <script>
-                MAPS_PLOT.init_coords("{{ airport.LATITUDE }},{{airport.LONGITUDE}}");
-                MAPS_PLOT.init_names("{{ airport.NAME }}");
-                MAPS_PLOT.init_airport_names("{{ airport.AIRPORT_NAME }}");
-                MAPS_PLOT.init_is_hubs("{{ airport.IS_HUB }}");
-                MAPS_PLOT.init_routes(
-                    "{{ airport.LATITUDE }},{{airport.LONGITUDE}}",
-                    "{{ selected_city_info.LATITUDE }},{{selected_city_info.LONGITUDE}}"
-                );
-            </script>
-        {% endfor %}
-        <script>
-            MAPS_PLOT.init_city_coords("{{ selected_city_info.LATITUDE }},{{selected_city_info.LONGITUDE}}");
-            MAPS_PLOT.init_city_names("{{ selected_city_info.NAME }}");
 
-            MAPS_PLOT.plot_map("{{ general_params_info.SAMPLE_NAME }}", 1, 0, 1);
-        </script>
+        <div id="all-window">
+            <div id="map-content">
+                <div id="map"></div>
+                <script src="{% static 'RouteDev/Maps/map.js' %}"></script>
+                {% for airport in airports_info %}
+                    <script>
+                        MAPS_PLOT.init_coords("{{ airport.LATITUDE }},{{airport.LONGITUDE}}");
+                        MAPS_PLOT.init_names("{{ airport.NAME }}");
+                        MAPS_PLOT.init_airport_names("{{ airport.AIRPORT_NAME }}");
+                        MAPS_PLOT.init_is_hubs("{{ airport.IS_HUB }}");
+                        MAPS_PLOT.init_routes(
+                            "{{ airport.LATITUDE }},{{airport.LONGITUDE}}",
+                            "{{ selected_city_info.LATITUDE }},{{selected_city_info.LONGITUDE}}"
+                        );
+                    </script>
+                {% endfor %}
+                <script>
+                    MAPS_PLOT.init_city_coords("{{ selected_city_info.LATITUDE }},{{selected_city_info.LONGITUDE}}");
+                    MAPS_PLOT.init_city_names("{{ selected_city_info.NAME }}");
 
-        <h1>NEW ROUTE CANDIDATES</h1>
-        {% for route in routes_info %}
-            <div id="Route{{ forloop.counter }}" class="RouteOuterBox">
-                <h1>{{ route.CITY.NAME }} &#x21D4; {{ route.AIRPORT.NAME }}</h1>
-                <h3>AVG GROWTH RATE: {{ route.GROWTH }}%</h3>
+                    MAPS_PLOT.plot_map("{{ general_params_info.SAMPLE_NAME }}", 1, 0, 1);
+                </script>
             </div>
-            <div id="RouteModal{{ forloop.counter }}" class="RouteModal">
-                <div class="modal-content-outer">
-                    <span class="close" id="close{{ forloop.counter }}">&times;</span>
-                    <div>
-                        <h1>{{ route.CITY.NAME }} &#x21D4; {{ route.AIRPORT.NAME }}</h1>
-                        <h3>DISTANCE: {{ route.DISTANCE }}, DURATION: {{ route.DURATION_IN }}, {{ route.DURATION_OUT }}</h3>
-                        <h4>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Pariatur, cum, voluptates, hic esse eum iste deleniti obcaecati perspiciatis labore quo atque at explicabo. Quis vitae quam, odio dicta qui reiciendis?</h4>
-                        <h3>PASSENGER DEMAND TILL {{ general_param_info.FORECAST_YEAR }} EXPECTED TO GROW BY {{ route.GROWTH }}</h3>
-                        <h3>{{ route.PRICE_IN_MARKET }}, {{ route.NUM_IN_MARKET }} - {{ route.PRICE_OUT_MARKET }}, {{ route.NUM_OUT_MARKET }}</h3>
-                        <form action="{% url 'RouteDev:CostResourceAnalysis' %}" method="post">
-                            {% csrf_token %}
-                            <button name="SELECTED_ROUTE_{{ route.CITY.NAME }}_{{ route.AIRPORT.AIRPORT_NAME }}">SELECT ROUTE</button>
-                        </form>
-                        <iframe src="{% static 'RouteDev/CostDemand.html' %}" frameborder="0" width="100%" height="800px"></iframe>
+            <div id="right-pane">
+                <div id="right-pane-title">
+                    <h1>NEW ROUTE<br>CANDIDATES</h1>
+                </div>
+                <div id="routes">
+                    {% for route in routes_info %}
+                    <div id="Route{{ forloop.counter }}" class="route">
+                        <div class="route-title">
+                            <h1>{{ route.CITY.NAME }} &#x21D4; {{ route.AIRPORT.NAME }}</h1>
+                        </div>
+                        <div class="route-info">
+                            <h3>GROWTH RATE: <b>{{ route.GROWTH }}%</b></h3>
+                        </div>
                     </div>
+                    <div id="RouteModal{{ forloop.counter }}" class="RouteModal">
+                        <div class="modal-content-outer">
+                            <span class="close" id="close{{ forloop.counter }}">&times;</span>
+                            <div>
+                                <h1>{{ route.CITY.NAME }} &#x21D4; {{ route.AIRPORT.NAME }}</h1>
+                                <h3>DISTANCE: {{ route.DISTANCE }}, DURATION: {{ route.DURATION_IN }}, {{ route.DURATION_OUT }}</h3>
+                                <h4>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Pariatur, cum, voluptates, hic esse eum iste deleniti obcaecati perspiciatis labore quo atque at explicabo. Quis vitae quam, odio dicta qui reiciendis?</h4>
+                                <h3>PASSENGER DEMAND TILL {{ general_param_info.FORECAST_YEAR }} EXPECTED TO GROW BY {{ route.GROWTH }}</h3>
+                                <h3>{{ route.PRICE_IN_MARKET }}, {{ route.NUM_IN_MARKET }} - {{ route.PRICE_OUT_MARKET }}, {{ route.NUM_OUT_MARKET }}</h3>
+                                <form action="{% url 'RouteDev:CostResourceAnalysis' %}" method="post">
+                                    {% csrf_token %}
+                                    <button name="SELECTED_ROUTE_{{ route.CITY.NAME }}_{{ route.AIRPORT.AIRPORT_NAME }}">SELECT ROUTE</button>
+                                </form>
+                                <iframe src="{% static 'RouteDev/CostDemand.html' %}" frameborder="0" width="100%" height="800px"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <script src="{% static 'RouteDev/RouteSelection/RouteSelection.js' %}"></script>
                 </div>
             </div>
-        {% endfor %}
-        <script src="{% static 'RouteDev/RouteSelection/RouteSelection.js' %}"></script> 
+        </div>
 
     </body>
 </html>

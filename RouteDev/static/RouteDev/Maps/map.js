@@ -49,25 +49,19 @@ var MAPS_PLOT = MAPS_PLOT || (function(){
                 if (show_route_link == 1) {
                     line_info = {
                         'color': 'white',
-                        'weight': 5,
+                        'weight': 2,
                         'opacity': 1
                     };
                 }
                 else {
                     line_info = {
                         'color': 'white',
-                        'weight': 1.5,
+                        'weight': 2,
                         'opacity': 0.5,
                         'dashArray': "10 1"
                     };
                 }
                 var polyline = L.polyline(polylinePoints, line_info);
-                if (show_route_link == 1) {
-                    polyline.bindPopup("<b>Route " + city_names[0] + "-" + names[i] + "</b><br><p onclick='show_route_link(" + i.toString() + ")'>Click on me!</p>");
-                }
-                else {
-                    polyline.bindPopup("<b>Route " + city_names[0] + "-" + names[i] + "</b>");
-                }
                 network_layer.addLayer(polyline);
             }
 
@@ -77,21 +71,26 @@ var MAPS_PLOT = MAPS_PLOT || (function(){
                 if (is_hubs[i] == "False") {
                     circle_info = {
                         color: 'black',
-                        fillColor: 'orange',
-                        fillOpacity: 1,
+                        fillColor: 'yellow',
+                        fillOpacity: 0.75,
                         radius: 30000
                     };
                 }
                 else {
                     circle_info = {
                         color: 'black',
-                        fillColor: 'red',
+                        fillColor: '#F7C325',
                         fillOpacity: 1,
                         radius: 50000
                     };
                 }
                 var circle = L.circle([lat_lon[0], lat_lon[1]], circle_info);
-                circle.bindTooltip("<b>" + names[i] + "</b><br>" + airport_names[i]);
+                if (show_route_link == 1) {
+                    circle.bindPopup("<b>" + city_names[0] + " - " + names[i] + "</b><p onclick='show_route_link(" + i.toString() + ")' style=\"cursor: pointer; margin: 0 0; text-align: center;\">Know More</p>");
+                }
+                else {
+                    circle.bindTooltip("<b style=\"text-align: center;\">" + names[i] + "</b><br>" + airport_names[i]);
+                }
                 network_layer.addLayer(circle);
             }
 
@@ -99,17 +98,28 @@ var MAPS_PLOT = MAPS_PLOT || (function(){
             for (let i = 0; i < city_coords.length; i++) {
                 var lat_lon = JSON.parse("[" + city_coords[i] + "]");
                 var circle_info = {};
-                circle_info = {
-                    fillColor: 'blue',
-                    fillOpacity: 1,
-                    radius: 70000
-                };
-                var circle = L.circle([lat_lon[0], lat_lon[1]], circle_info);
-                if (show_node_link == 1) {
-                    circle.bindPopup("<b>" + city_names[i] + "<br><p onclick='show_node_link(" + i.toString() + ")'>Click on me</p>");
+                if(show_route_link == 0) {
+                    circle_info = {
+                        color: '#2C88D9',
+                        fillColor: '#2C88D9',
+                        fillOpacity: 0.75,
+                        radius: 80000
+                    };
                 }
                 else {
-                    circle.bindPopup("<b>" + city_names[i]);
+                    circle_info = {
+                        color: 'black',
+                        fillColor: '#2C88D9',
+                        fillOpacity: 1,
+                        radius: 80000
+                    };
+                }
+                var circle = L.circle([lat_lon[0], lat_lon[1]], circle_info);
+                if (show_node_link == 1) {
+                    circle.bindPopup("<b style=\"text-align: center;\">" + city_names[i] + "</b><p onclick='show_node_link(" + i.toString() + ")' style=\"cursor: pointer; margin: 0 0; text-align: center;\">Know More</p>");
+                }
+                else {
+                    circle.bindTooltip("<b>" + city_names[i] + "</b>");
                 }
                 new_cities_layer.addLayer(circle);
             }

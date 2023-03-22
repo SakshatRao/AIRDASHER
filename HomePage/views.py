@@ -1,4 +1,4 @@
-from django.shortcuts import HttpResponse
+from django.shortcuts import render
 
-def index(request):
-    return HttpResponse("Hello, world. You're at the HomePage index.")
+def HomePage(request):
+    return render(request, 'HomePage/HomePage.html')

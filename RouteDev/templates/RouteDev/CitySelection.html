@@ -11,6 +11,7 @@
         <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
         <link rel="stylesheet" href="{% static 'RouteDev/Maps/map.css' %}">
 
+        <link rel="stylesheet" href="{% static 'HomePage/colors.css' %}">
         <link rel="stylesheet" href="{% static 'RouteDev/CitySelection/CitySelection.css' %}">
         
         <!-- Plotly JS -->
@@ -19,73 +20,90 @@
     
     <body>
 
-        <div id="map"></div>
-        <script src="{% static 'RouteDev/Maps/map.js' %}"></script>
-        {% for airport in airports_info %}
-            <script>
-                MAPS_PLOT.init_coords("{{ airport.LATITUDE }},{{airport.LONGITUDE}}");
-                MAPS_PLOT.init_names("{{ airport.NAME }}");
-                MAPS_PLOT.init_airport_names("{{ airport.AIRPORT_NAME }}");
-                MAPS_PLOT.init_is_hubs("{{ airport.IS_HUB }}");
-            </script>
-        {% endfor %}
-        {% for connection in connections_info %}
-            <script>
-                MAPS_PLOT.init_routes(
-                    "{{ connection.NODE1.LATITUDE }},{{connection.NODE1.LONGITUDE}}",
-                    "{{ connection.NODE2.LATITUDE }},{{connection.NODE2.LONGITUDE}}"
-                )
-            </script>
-        {% endfor %}
-        {% for city in cities_info %}
-            <script>
-                MAPS_PLOT.init_city_coords("{{ city.LATITUDE }},{{city.LONGITUDE}}");
-                MAPS_PLOT.init_city_names("{{ city.NAME }}");
-            </script>
-        {% endfor %}
-        <script>
-            MAPS_PLOT.plot_map("{{ general_params_info.SAMPLE_NAME }}", 0, 1, 0);
-        </script>
-
-        <h1>ADDING NEW AIRPORT TO NETWORK</h1>
-        {% for city in cities_info %}
-            <div id="City{{ forloop.counter }}" class="CityOuterBox">
-                <h1>{{ city.NAME }}</h1>
-                <h3>GROWTH RATE: {{ city.GROWTH_RATE }}%</h3>
+        <div id="all-window">
+            <div id="map-content">
+                <div id="map"></div>
+                <script src="{% static 'RouteDev/Maps/map.js' %}"></script>
+                {% for airport in airports_info %}
+                    <script>
+                        MAPS_PLOT.init_coords("{{ airport.LATITUDE }},{{airport.LONGITUDE}}");
+                        MAPS_PLOT.init_names("{{ airport.NAME }}");
+                        MAPS_PLOT.init_airport_names("{{ airport.AIRPORT_NAME }}");
+                        MAPS_PLOT.init_is_hubs("{{ airport.IS_HUB }}");
+                    </script>
+                {% endfor %}
+                {% for connection in connections_info %}
+                    <script>
+                        MAPS_PLOT.init_routes(
+                            "{{ connection.NODE1.LATITUDE }},{{connection.NODE1.LONGITUDE}}",
+                            "{{ connection.NODE2.LATITUDE }},{{connection.NODE2.LONGITUDE}}"
+                        )
+                    </script>
+                {% endfor %}
+                {% for city in cities_info %}
+                    <script>
+                        MAPS_PLOT.init_city_coords("{{ city.LATITUDE }},{{city.LONGITUDE}}");
+                        MAPS_PLOT.init_city_names("{{ city.NAME }}");
+                    </script>
+                {% endfor %}
+                <script>
+                    MAPS_PLOT.plot_map("{{ general_params_info.SAMPLE_NAME }}", 0, 1, 0);
+                </script>
             </div>
-            <div id="CityModal{{ forloop.counter }}" class="CityModal">
-                <div class="modal-content-outer">
-                    <span class="close" id="close{{ forloop.counter }}">&times;</span>
-                    <div>
-                        <h1>{{ city.NAME }}</h1>
-                        <h3>{{ city.AIRPORT_NAME }}</h3>
-                        <h4>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Pariatur, cum, voluptates, hic esse eum iste deleniti obcaecati perspiciatis labore quo atque at explicabo. Quis vitae quam, odio dicta qui reiciendis?</h4>
-                        <h3>PASSENGER DEMAND TILL {{ general_param_info.FORECAST_YEAR }} EXPECTED TO GROW BY {{ city.GROWTH_RATE }}</h3>
-                        <form action="{% url 'RouteDev:RouteSelection' %}" method="post">
-                            {% csrf_token %}
-                            <button name="SELECTED_CITY_{{ city.NAME }}">SELECT CITY</button>
-                        </form>
-                        <iframe src="{% static 'RouteDev/CostDemand.html' %}" frameborder="0" width="100%" height="800px"></iframe>
+            <div id="right-pane">
+                <div id="right-pane-title">
+                    <h1>HIGH-GROWTH CITIES</h1>
+                </div>
+                <div id="cities">
+                    {% for city in cities_info %}
+                        <div id="City{{ forloop.counter }}" class="city">
+                            <div class="city-title">
+                                <h1>{{ city.NAME }}</h1>
+                            </div>
+                            <div class="city-info">
+                                <h3>GROWTH RATE: {{ city.GROWTH_RATE }}%</h3>
+                            </div>
+                        </div>
+                        <div id="CityModal{{ forloop.counter }}" class="CityModal">
+                            <div class="modal-content-outer">
+                                <span class="close" id="close{{ forloop.counter }}">&times;</span>
+                                <div>
+                                    <h1>{{ city.NAME }}</h1>
+                                    <h3>{{ city.AIRPORT_NAME }}</h3>
+                                    <h4>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Pariatur, cum, voluptates, hic esse eum iste deleniti obcaecati perspiciatis labore quo atque at explicabo. Quis vitae quam, odio dicta qui reiciendis?</h4>
+                                    <h3>PASSENGER DEMAND TILL {{ general_param_info.FORECAST_YEAR }} EXPECTED TO GROW BY {{ city.GROWTH_RATE }}</h3>
+                                    <form action="{% url 'RouteDev:RouteSelection' %}" method="post">
+                                        {% csrf_token %}
+                                        <button name="SELECTED_CITY_{{ city.NAME }}">SELECT CITY</button>
+                                    </form>
+                                    <iframe src="{% static 'RouteDev/CostDemand.html' %}" frameborder="0" width="100%" height="800px"></iframe>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <script src="{% static 'RouteDev/CitySelection/CitySelection.js' %}"></script>
+                </div>
+                <form action="{% url 'RouteDev:CitySelection' %}" method="post" id="params">
+                    {% csrf_token %}
+                    <div id="params-config">
+                        <div class="param-config">
+                            <label>FORECAST YEAR:</label>
+                            <input type="number" name="NEW_FORECAST_YEAR" id="FORECAST_YEAR" value="{{ general_params_info.FORECAST_YEAR }}">
+                        </div>
+                        <div class="param-config">
+                            <label>Sample:</label>
+                            <select id="SAMPLE_NAME" name="NEW_SAMPLE_NAME" value="{{ general_params_info.SAMPLE_NAME }}">
+                                <option value="Sample1">Sample 1</option>
+                                <option value="Sample22">Sample 22</option>
+                            </select>      
+                        </div>
+                    </div>
+                    <div id="params-submit">
+                        <input type="submit" value="Submit">
                     </div>
                 </div>
             </div>
-        {% endfor %}
-        <script src="{% static 'RouteDev/CitySelection/CitySelection.js' %}"></script>
-        
-        <h1>Parameters:</h1>
-        <form action="{% url 'RouteDev:CitySelection' %}" method="post">
-            {% csrf_token %}
-            <fieldset>
-                <label>FORECAST YEAR:</label>
-                <input type="number" name="NEW_FORECAST_YEAR" id="FORECAST_YEAR" value="{{ general_params_info.FORECAST_YEAR }}">
-                <label>Sample:</label>
-                <select id="SAMPLE_NAME" name="NEW_SAMPLE_NAME" value="{{ general_params_info.SAMPLE_NAME }}">
-                    <option value="Sample1">Sample 1</option>
-                    <option value="Sample22">Sample 22</option>
-                </select>
-            </fieldset>
-            <input type="submit" value="Submit">
-        </form>
+        </div>
     
     </body>
 </html>

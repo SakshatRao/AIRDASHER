@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import json
 import os
-import joblib
 
 class PreProcessor:
     
@@ -58,71 +57,18 @@ class PreProcessor:
         print("Loaded Monument Visitors Data")
     
     def fetch_Models(self, input_load_path):
-        self.CitySelection_model = joblib.load(f"{input_load_path}/Models/CitySelection_model.joblib")
-        self.RouteSelection_model = joblib.load(f"{input_load_path}/Models/RouteSelection_model.joblib")
+        # self.CitySelection_model = joblib.load(f"{input_load_path}/Models/CitySelection_model.joblib")
+        # self.RouteSelection_model = joblib.load(f"{input_load_path}/Models/RouteSelection_model.joblib")
+        with open(f'{input_load_path}/Models/CitySelectionModel_coefs.json', 'r') as load_file:
+            self.CitySelection_model_coefs = json.load(load_file)
+        with open(f'{input_load_path}/Models/CitySelection_cols_standardization.json', 'r') as load_file:
+            self.CitySelection_cols_standardization_vals = json.load(load_file)
+        all_pca_files = os.listdir(f'{input_load_path}/Models/PCA/')
+        self.CitySelection_pca = [None] * 10
+        for pca_file in all_pca_files:
+            pca_idx = int(pca_file.split('.')[0].split('_')[1]) - 1
+            self.CitySelection_pca[pca_idx] = np.load(f'{input_load_path}/Models/PCA/{pca_file}')
+        self.present_features = pd.read_csv(f'{input_load_path}/Models/Present_Features/data_pca_X.csv')
 
-class ID_Generator:
-    def __init__(self, max_range = 100):
-        self.all_ids = []
-        self.max_range = max_range
-    
-    def generate_id(self):
-        new_id = 0
-        while(True):
-            new_id = np.random.randint(self.max_range)
-            if(new_id not in self.all_ids):
-                break
-        self.all_ids.append(new_id)
-        return new_id
-
-class Airport:
-    def __init__(self, airport_id):
-        self.id = airport_id
-        self.airport_info = {}
-        self.to_list = []
-        self.from_list = []
-        self.to_airport_list = []
-        self.from_airport_list = []
-        
-    def __str__(self):
-        return self.airport_info['Name']
-        
-    def init_airport_info(self, airport_info):
-        self.airport_info = airport_info
-    
-    def add_to_list(self, to_route):
-        self.to_list.append(to_route)
-        self.update_to_airports()
-        
-    def add_from_list(self, from_route):
-        self.from_list.append(from_route)
-        self.update_from_airports()
-        
-    def update_to_airports(self):
-        self.to_airport_list = [x.to_airport for x in self.to_list]
-    
-    def update_from_airports(self):
-        self.from_airport_list = [x.from_airport for x in self.from_list]
-
-class Route:
-    def __init__(self, route_id):
-        self.id = route_id
-        self.from_airport = None
-        self.to_airport = None
-        self.route_info = {}
-    
-    def __str__(self):
-        return str(self.from_airport) + "-" + str(self.to_airport)
-    
-    def init_from_to(self, from_airport, to_airport):
-        self.from_airport = from_airport
-        self.to_airport = to_airport
-        return self.update_from_to_list()
-    
-    def init_route_info(self, route_info):
-        self.route_info = route_info
-    
-    def update_from_to_list(self):
-        self.to_airport.add_from_list(self)
-        self.from_airport.add_to_list(self)
-        return self.from_airport, self.to_airport
+        with open(f'{input_load_path}/Models/RouteSelectionModel_coefs.json', 'r') as load_file:
+            self.RouteSelection_model_coefs = json.load(load_file)

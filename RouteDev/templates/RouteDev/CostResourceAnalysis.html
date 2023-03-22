@@ -12,8 +12,8 @@
     </head>
     <body>
         <h1>FEASIBILITY OF NEW ROUTE</h1>
-        {% for option, option_total_planes, option_plane_addition_info in options_info %}
-            <div id="Option{{ forloop.counter }}" class="OptionOuterBox">
+        {% for option, option_total_planes, option_plane_addition_info, option_feasibility in options_info %}
+            <div id="Option{{ forloop.counter }}" class="OptionOuterBox {{ option_feasibility }}">
                 <h1>Option {{ forloop.counter }}</h1>
                 <h3>PROFT MARGIN: {{ option.PROFIT_MARGIN }}%</h3>
                 <h3>{{ option_total_planes.0 }} Narrowbody + {{ option_total_planes.1 }} Turboprop</h3>

@@ -124,7 +124,7 @@ def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor,
 
     route_traffic_df = get_route_timing_features(route_traffic_df)
 
-    pca_vals_df = pd.read_csv(f'{output_save_path}/Present_Features/data_pca_X.csv')
+    pca_vals_df = preprocessor.present_features.copy()
     pca_cols = ['City_' + x for x in pca_vals_df.columns if x != 'City']
     pca_vals_df.columns = pca_cols + ['City']
     pca_vals_df['Year'] = pd.Series([PRESENT_YEAR] * pca_vals_df.shape[0])
@@ -176,11 +176,14 @@ def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor,
             valid_route_traffic_df[col] = (valid_route_traffic_df[col] - col_mean) / (col_std + 1e-20)
             cols_standardization_vals[col] = {'mean': col_mean, 'std': col_std}
 
-    data_X = valid_route_traffic_df[X_features].values
-    data_y = valid_route_traffic_df[y_features].values[:, 0]
-    data_cities = [(x[0], x[1]) for x in valid_route_traffic_df[['From', 'To']].values]
+    class LinearModel:
+        def __init__(self, coefs):
+            self.coefs = coefs
+        def predict(self, X):
+            assert(len(self.coefs) == X.shape[1] + 1)
+            return np.dot([*self.coefs.values()][1:], X.transpose()) + self.coefs['intercept']
 
-    model = preprocessor.RouteSelection_model
+    model = LinearModel(preprocessor.RouteSelection_model_coefs)
 
     uniq_hubs = preprocessor.network_data[preprocessor.network_data['FromHub'] == 1]['From'].unique()
 

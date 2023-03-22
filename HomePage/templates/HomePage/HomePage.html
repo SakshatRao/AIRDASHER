@@ -1,0 +1,82 @@
+{% load static %}
+
+<DOCTYPE html>
+<html>
+
+    <head>
+        <title>Home Page</title>
+        <link rel="stylesheet" href="{% static 'HomePage/colors.css' %}">
+        <link rel="stylesheet" href="{% static 'HomePage/HomePage.css' %}">
+    </head>
+
+    <body>
+        <div id="all-window">
+            <div id="header">
+                <div id="header-title">
+                    <img src="{% static 'HomePage/HomePage_Pics/logo.png' %}" alt="AIRDASHER logo">
+                    <h1>AIRDASHER</h1>
+                </div>
+                <div id="header-info">
+                    <div id="header-info-content">
+                        <h3>ANALYTICAL INTELLIGENCE FOR ROUTE DEVELOPMENT AND STRATEGIC HANDLING OF ECONOMIC RESOURCES</h3>
+                        <img src="{% static 'HomePage/HomePage_Pics/info.png' %}" alt="Info logo">
+                    </div>
+                </div>
+            </div>
+            <div id="cards">
+                <div class="card" id="routedev-card">
+                    <a href="{% url 'RouteDev:RouteDevHome' %}">
+                        <div class="card-content">
+                            <div class="card-img">
+                                <img src="{% static 'HomePage/HomePage_Pics/RouteDev.jpg' %}" alt="Route Development">
+                            </div>
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <h1>ANALYZE NEW<br>ROUTES</h1>    
+                                </div>
+                                <div class="card-info">
+                                    <h3>Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic repellat accusantium repudiandae recusandae, doloremque voluptatem. Reprehenderit soluta aut autem. Quibusdam!</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="card" id="airport-card">
+                    <a href="{% url 'RouteDev:CitySelection' %}">
+                        <div class="card-content">
+                            <div class="card-img">
+                                <img src="{% static 'HomePage/HomePage_Pics/Airport.jpg' %}" alt="Route Development">
+                            </div>
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <h1>ANALYZE NEW<br>AIRPORTS</h1>    
+                                </div>
+                                <div class="card-info">
+                                    <h3>Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic repellat accusantium repudiandae recusandae, doloremque voluptatem. Reprehenderit soluta aut autem. Quibusdam!</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="card" id="generalstats-card">
+                    <a href="{% url 'RouteDev:CitySelection' %}">
+                        <div class="card-content">
+                            <div class="card-img">
+                                <img src="{% static 'HomePage/HomePage_Pics/GeneralStats.jpg' %}" alt="Route Development">
+                            </div>
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <h1>GENERAL<br>STATISTICS</h1>    
+                                </div>
+                                <div class="card-info">
+                                    <h3>Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic repellat accusantium repudiandae recusandae, doloremque voluptatem. Reprehenderit soluta aut autem. Quibusdam!</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </body>
+
+</html>

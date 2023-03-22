@@ -3,14 +3,63 @@ import pandas as pd
 
 import geopy.distance
 
-from sklearn.decomposition import PCA
-
 import shutil
 import os
 
 import time
+import json
 
 from collections import OrderedDict
+
+class Airport:
+    def __init__(self):
+        self.airport_info = {}
+        self.to_list = []
+        self.from_list = []
+        self.to_airport_list = []
+        self.from_airport_list = []
+
+    def __str__(self):
+        return self.airport_info['Name']
+
+    def init_airport_info(self, airport_info):
+        self.airport_info = airport_info
+
+    def add_to_list(self, to_route):
+        self.to_list.append(to_route)
+        self.update_to_airports()
+
+    def add_from_list(self, from_route):
+        self.from_list.append(from_route)
+        self.update_from_airports()
+
+    def update_to_airports(self):
+        self.to_airport_list = [x.to_airport for x in self.to_list]
+
+    def update_from_airports(self):
+        self.from_airport_list = [x.from_airport for x in self.from_list]
+
+class Route:
+    def __init__(self):
+        self.from_airport = None
+        self.to_airport = None
+        self.route_info = {}
+
+    def __str__(self):
+        return str(self.from_airport) + "-" + str(self.to_airport)
+
+    def init_from_to(self, from_airport, to_airport):
+        self.from_airport = from_airport
+        self.to_airport = to_airport
+        return self.update_from_to_list()
+
+    def init_route_info(self, route_info):
+        self.route_info = route_info
+
+    def update_from_to_list(self):
+        self.to_airport.add_from_list(self)
+        self.from_airport.add_to_list(self)
+        return self.from_airport, self.to_airport
 
 # Script for selecting city with highest growth potential
 def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, output_save_path, plotly_save_path):
@@ -77,24 +126,24 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
     economic_data = get_economic_data(tier_1_2_cities)
 
     def get_tourism_data(cities):
-    
+
         def distance_factor(miles):
             return np.exp(miles / (-200))
-        
+
         def closest_node(node, nodes):
             dist = np.sum((nodes - node)**2, axis=1)
             return np.argmin(dist)
-        
+
         all_cities_coords = preprocessor.city_mapping[preprocessor.city_mapping['City'].isin(cities)]
         all_cities_coords = all_cities_coords['Airport_City_Coords']
         all_cities_coords_lat = all_cities_coords.apply(lambda x: float(x.split(',')[0])).values
         all_cities_coords_lon = all_cities_coords.apply(lambda x: float(x.split(',')[1])).values
         all_cities_coords = np.asarray(list(zip(all_cities_coords_lat, all_cities_coords_lon)))
-        
+
         all_cities_tourism_dict = {}
         for city in cities:
             all_cities_tourism_dict[city] = np.zeros(preprocessor.monument_visitors_data.shape[1] - 1, dtype = 'float')
-        
+
         for idx, row in preprocessor.tourist_loc_coords_data.iterrows():
             tourist_loc_coord = np.asarray([row['Latitude'], row['Longitude']])
             closest_idx = closest_node(tourist_loc_coord, all_cities_coords)
@@ -115,7 +164,7 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
         tourism_data.drop(['Domestic2018-19', 'Domestic2019-20', 'Domestic2020-21', 'Foreign2018-19', 'Foreign2019-20', 'Foreign2020-21', 'NumMonuments2020'], axis = 1, inplace = True)
         tourism_data = tourism_data.rename({'Domestic2021-22': 'Domestic_tourism_latest', 'Foreign2021-22': 'Foreign_tourism_latest', 'NumMonuments2022': 'NumMonuments_tourism_latest'}, axis = 1)
         return tourism_data
-        
+
     tourism_data = get_tourism_data(tier_1_2_cities)
 
     def get_education_data(cities):
@@ -295,64 +344,71 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
     total_dataset = all_datasets_list[0]
     for dataset in all_datasets_list[1:]:
         total_dataset = pd.merge(total_dataset, dataset, on = 'City')
-    
+
     latest_features = [x for x in total_dataset.columns if x.endswith('_latest')]
     history_features = [x for x in total_dataset.columns if x.endswith('_history')]
     latestyear_features = [x for x in total_dataset.columns if x.endswith('_latestyear')]
     target_feature = [x for x in total_dataset.columns if x.endswith('_target')]
     assert(len(latest_features) + len(history_features) + len(target_feature) + len(latestyear_features) + 1 == total_dataset.shape[1])
 
-    # Trimming data for model training - Removing cities having no target variable
-    # Standardizing data
-    total_valid_data = total_dataset.copy()
-    cols_standardization_vals = {}
-    for col_idx, col in enumerate(total_valid_data.columns):
-        if((col in target_feature) or (col in latest_features)):
-            if(col in target_feature):
-                to_drop_idx = pd.isnull(total_valid_data[col])
-                to_drop_idx = to_drop_idx[to_drop_idx == True].index
-                total_valid_data = total_valid_data.drop(to_drop_idx, axis = 0)
-            elif(col in latest_features):
-                col_mean = np.nanmean(total_valid_data[col].values)
-                total_valid_data[col] = total_valid_data[col].fillna(col_mean)
-            col_mean = total_valid_data[col].mean()
-            col_std = total_valid_data[col].std()
-            total_valid_data[col] = (total_valid_data[col] - col_mean) / (col_std + 1e-20)
-            cols_standardization_vals[col] = {'mean': col_mean, 'std': col_std}
-    
-    data_X = total_valid_data[latest_features].values
-    data_y = total_valid_data[target_feature].values[:, 0]
-
-    # Applying PCA to reduce number of features
-    # Required since we are training with very little data, having more features resulted in overfitting
     N_COMPONENTS = 2
     categories = ['economic', 'tourism', 'education', 'population']
     categories_cols = []
-    category_pca = []
-    category_used_cols = []
-    data_pca_X = np.zeros((data_X.shape[0], len(categories) * N_COMPONENTS))
-    for category_idx, category in enumerate(categories):
-        to_use_cols = [x for x in range(data_X.shape[1]) if latest_features[x].endswith(f"_{category}_latest")]
-        category_data = data_X[:, to_use_cols]
-        if(category_data.shape[1] <= N_COMPONENTS):
-            data_pca_X[:, category_idx * N_COMPONENTS: category_idx * N_COMPONENTS + category_data.shape[1]] = category_data
-            category_pca.append(None)
-        else:
-            pca = PCA(n_components = N_COMPONENTS)
-            category_pca_data = pca.fit_transform(category_data)
-            data_pca_X[:, category_idx * N_COMPONENTS: (category_idx + 1) * N_COMPONENTS] = category_pca_data
-            category_pca.append(pca)
-        category_used_cols.append(to_use_cols)
+    for category in categories:
         categories_cols.extend([f"{category}_pca{n}" for n in range(1, N_COMPONENTS + 1)])
+    
+    cols_standardization_vals = preprocessor.CitySelection_cols_standardization_vals
+    
+    # # Trimming data for model training - Removing cities having no target variable
+    # # Standardizing data
+    # total_valid_data = total_dataset.copy()
+    # for col_idx, col in enumerate(total_valid_data.columns):
+    #     if((col in target_feature) or (col in latest_features)):
+    #         if(col in target_feature):
+    #             to_drop_idx = pd.isnull(total_valid_data[col])
+    #             to_drop_idx = to_drop_idx[to_drop_idx == True].index
+    #             total_valid_data = total_valid_data.drop(to_drop_idx, axis = 0)
+    #         elif(col in latest_features):
+    #             col_mean = np.nanmean(total_valid_data[col].values)
+    #             total_valid_data[col] = total_valid_data[col].fillna(col_mean)
+    #         col_mean = cols_standardization_vals[col]['mean']
+    #         col_std = cols_standardization_vals[col]['std']
+    #         total_valid_data[col] = (total_valid_data[col] - col_mean) / (col_std + 1e-20)
+    #         cols_standardization_vals[col] = {'mean': col_mean, 'std': col_std}
 
-    data_pca_X_df = pd.DataFrame(data_pca_X, columns = categories_cols)
-    data_pca_X_df['City'] = pd.Series(total_valid_data['City'].values)
+    # data_X = total_valid_data[latest_features].values
+    # data_y = total_valid_data[target_feature].values[:, 0]
 
-    shutil.rmtree(f"{output_save_path}/Present_Features/", ignore_errors = True)
-    os.mkdir(f"{output_save_path}/Present_Features/")
-    data_pca_X_df.to_csv(f'{output_save_path}/Present_Features/data_pca_X.csv', index = None)
+    # # Applying PCA to reduce number of features
+    # # Required since we are training with very little data, having more features resulted in overfitting
+    # category_used_cols = []
+    # data_pca_X = np.zeros((data_X.shape[0], len(categories) * N_COMPONENTS))
+    # for category_idx, category in enumerate(categories):
+    #     to_use_cols = [x for x in range(data_X.shape[1]) if latest_features[x].endswith(f"_{category}_latest")]
+    #     category_data = data_X[:, to_use_cols]
+    #     if(category_data.shape[1] <= N_COMPONENTS):
+    #         data_pca_X[:, category_idx * N_COMPONENTS: category_idx * N_COMPONENTS + category_data.shape[1]] = category_data
+    #     else:
+    #         pca = preprocessor.CitySelection_pca[category_idx]
+    #         category_pca_data = np.dot(pca, category_data.transpose()).transpose()
+    #         data_pca_X[:, category_idx * N_COMPONENTS: (category_idx + 1) * N_COMPONENTS] = category_pca_data
+    #     category_used_cols.append(to_use_cols)
 
-    model = preprocessor.CitySelection_model
+    # data_pca_X_df = pd.DataFrame(data_pca_X, columns = categories_cols)
+    # data_pca_X_df['City'] = pd.Series(total_valid_data['City'].values)
+
+    # shutil.rmtree(f"{output_save_path}/Present_Features/", ignore_errors = True)
+    # os.mkdir(f"{output_save_path}/Present_Features/")
+    # data_pca_X_df.to_csv(f'{output_save_path}/Present_Features/data_pca_X.csv', index = None)
+
+    class LinearModel:
+        def __init__(self, coefs):
+            self.coefs = coefs
+        def predict(self, X):
+            assert(len(self.coefs) == X.shape[1] + 1)
+            return np.dot([*self.coefs.values()][1:], X.transpose()) + self.coefs['intercept']
+
+    model = LinearModel(preprocessor.CitySelection_model_coefs)
 
     def get_forecasted_values(total_dataset_raw, FORECAST_YEAR):
         total_dataset = total_dataset_raw.copy()
@@ -396,7 +452,7 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
         growth_forecasts_df['City'] = total_dataset['City']
         growth_forecasts_df = growth_forecasts_df.reset_index(drop = True)
         total_dataset = pd.merge(total_dataset, growth_forecasts_df, on = 'City')
-        
+
         forecast_features = [x for x in total_dataset.columns if x.endswith('_forecast')]
         non_forecast_col_growths = {
             'NumMonuments_tourism_latest': 0,
@@ -429,7 +485,7 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
                     total_dataset = total_dataset.drop(col + '_growth', axis = 1)
                 else:
                     total_dataset[col + '2'] = total_dataset[col]
-        
+
         new_total_valid_data = total_dataset[['City'] + [x for x in total_dataset.columns if x.endswith('_latest2')]].copy()
         new_latest_features = [x for x in total_dataset.columns if x.endswith('_latest2')]
         for col_idx, col in enumerate(new_total_valid_data.columns):
@@ -438,7 +494,7 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
                 col_std = cols_standardization_vals[col[:-1]]['std']
                 new_total_valid_data[col] = new_total_valid_data[col].fillna(col_mean)
                 new_total_valid_data[col] = (new_total_valid_data[col] - col_mean) / (col_std + 1e-20)
-        
+
         new_data_X = new_total_valid_data[new_latest_features].values
         new_data_pca_X = np.zeros((new_data_X.shape[0], len(categories) * N_COMPONENTS))
         for category_idx, category in enumerate(categories):
@@ -447,20 +503,20 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
             if(category_data.shape[1] <= N_COMPONENTS):
                 new_data_pca_X[:, category_idx * N_COMPONENTS: category_idx * N_COMPONENTS + category_data.shape[1]] = category_data
             else:
-                pca = category_pca[category_idx]
-                category_pca_data = pca.transform(category_data)
+                pca = preprocessor.CitySelection_pca[category_idx]
+                category_pca_data = np.dot(pca, category_data.transpose()).transpose()
                 new_data_pca_X[:, category_idx * N_COMPONENTS: (category_idx + 1) * N_COMPONENTS] = category_pca_data
         new_data_pca_X_df = pd.DataFrame(new_data_pca_X, columns = categories_cols)
         new_data_pca_X_df['City'] = pd.Series(new_total_valid_data['City'].values)
-        
+
         target_mean = cols_standardization_vals[target_feature[0]]['mean']
         target_std = cols_standardization_vals[target_feature[0]]['std']
         new_pred_traffic = model.predict(new_data_pca_X) * target_std + target_mean
         new_pred_traffic[new_pred_traffic < 0] = 0
         new_pred_traffic_df = pd.DataFrame.from_dict({'City': new_total_valid_data['City'].values, 'PredictedFutureTraffic': new_pred_traffic}, orient = 'columns')
-        
+
         return new_data_pca_X_df, new_pred_traffic_df, [new_total_valid_data, total_dataset]
-    
+
     shutil.rmtree(f"{output_save_path}/Forecasted_Features/", ignore_errors = True)
     os.mkdir(f"{output_save_path}/Forecasted_Features/")
     for year in range(PRESENT_YEAR, FORECAST_YEAR + 1):
@@ -471,72 +527,6 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
             present_year_forecasts = new_pred_traffic_df
         if(year == FORECAST_YEAR):
             forecasted_traffic_df =  new_pred_traffic_df
-    
-    class ID_Generator:
-        def __init__(self, max_range = 100):
-            self.all_ids = []
-            self.max_range = max_range
-        
-        def generate_id(self):
-            new_id = 0
-            while(True):
-                new_id = np.random.randint(self.max_range)
-                if(new_id not in self.all_ids):
-                    break
-            self.all_ids.append(new_id)
-            return new_id
-
-    class Airport:
-        def __init__(self, airport_id):
-            self.id = airport_id
-            self.airport_info = {}
-            self.to_list = []
-            self.from_list = []
-            self.to_airport_list = []
-            self.from_airport_list = []
-            
-        def __str__(self):
-            return self.airport_info['Name']
-            
-        def init_airport_info(self, airport_info):
-            self.airport_info = airport_info
-        
-        def add_to_list(self, to_route):
-            self.to_list.append(to_route)
-            self.update_to_airports()
-            
-        def add_from_list(self, from_route):
-            self.from_list.append(from_route)
-            self.update_from_airports()
-            
-        def update_to_airports(self):
-            self.to_airport_list = [x.to_airport for x in self.to_list]
-        
-        def update_from_airports(self):
-            self.from_airport_list = [x.from_airport for x in self.from_list]
-
-    class Route:
-        def __init__(self, route_id):
-            self.id = route_id
-            self.from_airport = None
-            self.to_airport = None
-            self.route_info = {}
-        
-        def __str__(self):
-            return str(self.from_airport) + "-" + str(self.to_airport)
-        
-        def init_from_to(self, from_airport, to_airport):
-            self.from_airport = from_airport
-            self.to_airport = to_airport
-            return self.update_from_to_list()
-        
-        def init_route_info(self, route_info):
-            self.route_info = route_info
-        
-        def update_from_to_list(self):
-            self.to_airport.add_from_list(self)
-            self.from_airport.add_to_list(self)
-            return self.from_airport, self.to_airport
 
     airport_current_traffic_df = pd.merge(airport_traffic_data, present_year_forecasts, on = 'City')
     def get_current_traffic(row):
@@ -588,32 +578,29 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
                 if(row['Name'] not in to_use_airports):
                     exclude_idx.append(idx)
             airport_df = airport_df.drop(exclude_idx, axis = 0).reset_index(drop = True)
-        
+
         airport_df['Latitude_Longitude'] = airport_df['Name'].map(dict(zip(preprocessor.city_mapping['AirRouteData_AirportCode'].values, preprocessor.city_mapping['Airport_City_Coords'])))
         airport_df['Latitude'] = airport_df['Latitude_Longitude'].apply(lambda x: float(x.split(', ')[0].strip()))
         airport_df['Longitude'] = airport_df['Latitude_Longitude'].apply(lambda x: float(x.split(', ')[1].strip()))
         airport_df = airport_df.drop('Latitude_Longitude', axis = 1)
         airport_attr_cols = [x for x in airport_df.columns]
 
-        airport_id_gen = ID_Generator(100)
-        route_id_gen = ID_Generator(1000)
-
         AIRPORTS = {}
         ROUTES = {}
 
         for idx, row in airport_df.iterrows():
-            airport_obj = Airport(airport_id_gen.generate_id())
+            airport_obj = Airport()
             airport_attr = dict([(x, row[x]) for x in airport_attr_cols])
             airport_obj.init_airport_info(airport_attr)
             AIRPORTS[row['Name']] = airport_obj
 
         for idx, row in route_df.iterrows():
-            route_obj = Route(route_id_gen.generate_id())
+            route_obj = Route()
             AIRPORTS[row['From']], AIRPORTS[row['To']] = route_obj.init_from_to(AIRPORTS[row['From']], AIRPORTS[row['To']])
             route_attr = dict([(x, row[x]) for x in route_attr_cols])
             route_obj.init_route_info(route_attr)
             ROUTES[f"{row['From']}-{row['To']}"] = route_obj
-        
+
         return AIRPORTS, ROUTES
 
     AIRPORTS, ROUTES = plot_network(

@@ -1,0 +1,92 @@
+body {
+    background-color: var(--light1);
+    color: var(--black);
+}
+
+#all-window {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 0 4% 0;
+}
+
+#header-title h1 {
+    font-size: 3em;
+    margin: 10% 0 0 0;
+}
+
+#icons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 30%;
+}
+
+.icon-img {
+    margin: 0 auto;
+    width: 50%;
+}
+
+.icon-img img {
+    width: 100%;
+    margin: 0 auto;
+}
+
+.icon-text {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.icon-text h1 {
+    margin: 0 0;
+}
+
+.icon-text h3 {
+    color: var(--dark3);
+}
+
+#proceed {
+    margin: 4% 0 0 0;
+    width: 12%;
+    text-align: center;
+}
+
+#proceed-button {
+    background-color: var(--blue);
+    border: 1px solid var(--black);
+    margin: 0 auto;
+}
+
+#proceed-button a {
+    display: inline-block;
+    width: 100%;
+    text-decoration: none;
+    color: var(--white);
+}
+
+#proceed-button a h2 {
+    padding: 0 15%;
+    margin: 8% auto;
+    font-size: 1.5em;
+}
+
+#proceed-button a:visited, #proceed a:link {
+    color: var(--white);
+}

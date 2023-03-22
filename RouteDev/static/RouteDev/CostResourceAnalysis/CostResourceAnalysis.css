@@ -1,3 +1,11 @@
+.feasible {
+    background-color: green;
+}
+
+.non_feasible {
+    background-color: red;
+}
+
 .OptionModal {
     display: None;
     position: fixed;

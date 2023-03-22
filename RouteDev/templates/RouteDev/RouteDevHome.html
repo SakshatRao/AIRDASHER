@@ -1,0 +1,76 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <title>Route Development</title>
+
+        <link rel="stylesheet" href="{% static 'HomePage/colors.css' %}">
+        <link rel="stylesheet" href="{% static 'RouteDev/RouteDevHome/RouteDevHome.css' %}">
+        
+    </head>
+    
+    <body>
+
+        <div id="all-window">
+            <div id="header">
+                <div id="header-title">
+                    <h1>ANALYZE NEW ROUTES</h1>
+                </div>
+                <div id="header-info">
+                    <h3>FIND NEW ROUTES AND THEIR FEASIBILITY & PROFITABILITY VIA THESE 3 STEPS</h3>
+                </div>
+            </div>
+            <div id="icons">
+                <div class="icon">
+                    <div class="icon-img">
+                        <img src="{% static 'RouteDev/RouteDev_Pics/CitySelection.png' %}" alt="City Selection">
+                    </div>
+                    <div class="icon-text">
+                        <div>
+                            <h1>CITY SELECTION</h1>
+                        </div>
+                        <div>
+                            <h3>CHOOSE CITIES WITH VERY HIGH GROWTH POTENTIAL IN AIR TRAFFIC DEMAND</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="icon">
+                    <div class="icon-text">
+                        <div>
+                            <h1>ROUTE SELECTION</h1>
+                        </div>
+                        <div>
+                            <h3>INTEGRATE THE CITY INTO YOUR AIRLINE'S NETWORK BY CONNECTING IT TO A HUB</h3>
+                        </div>
+                    </div>
+                    <div class="icon-img">
+                        <img src="{% static 'RouteDev/RouteDev_Pics/RouteSelection.png' %}" alt="Route Selection">
+                    </div>
+                </div>
+                <div class="icon">
+                    <div class="icon-img">
+                        <img src="{% static 'RouteDev/RouteDev_Pics/CostResourceAnalysis.png' %}" alt="Cost & Resource Analysis">
+                    </div>
+                    <div class="icon-text">
+                        <div>
+                            <h1>COST & RESOURCE ANALYSIS</h1>
+                        </div>
+                        <div>
+                            <h3>TWEAK PARAMETERS TO CHECK FEASIBILITY & PROFITABILITY OF NEW ROUTE</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="proceed">
+                <div id="proceed-button">
+                    <a href="{% url 'RouteDev:CitySelection' %}">
+                        <h2>PROCEED</h2>
+                    </a>
+                </div>
+            </div>
+        </div>
+    
+    </body>
+</html>
