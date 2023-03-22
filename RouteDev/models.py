@@ -19,7 +19,6 @@ class CITY_CLASS(models.Model):
     NAME = models.CharField(max_length = 30)
     AIRPORT_NAME = models.CharField(max_length = 3)
     GROWTH_RATE = models.FloatField()
-    IMG = models.ImageField(blank = True)
     FORECASTED_DEMAND = models.IntegerField()
     TOURISM_GROWTH = models.IntegerField()
     ECONOMIC_GROWTH = models.IntegerField()

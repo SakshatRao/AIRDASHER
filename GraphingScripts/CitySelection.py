@@ -4,6 +4,8 @@ import plotly.express as px
 import numpy as np
 import pandas as pd
 
+from pathlib import Path
+
 def CitySelection_GraphingScript(cities):
 
     demand = np.asarray([10, 20, 20, 30, 50])
@@ -26,6 +28,7 @@ def CitySelection_GraphingScript(cities):
     layout = go.Layout()
 
     fig = go.Figure(data = data, layout = layout)
-    pyo.plot(fig, filename = "./RouteDev/static/RouteDev/CostDemand.html", auto_open = False, output_type = 'file', include_plotlyjs = 'cdn')
+    THIS_FOLDER = Path(__file__).parent.resolve()
+    pyo.plot(fig, filename = f"{THIS_FOLDER}/RouteDev/static/RouteDev/CostDemand.html", auto_open = False, output_type = 'file', include_plotlyjs = 'cdn')
 
 CitySelection_GraphingScript([])

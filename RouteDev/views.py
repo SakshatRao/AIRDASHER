@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .models import GENERAL_PARAMS_CLASS, ROUTE_PARAMS_CLASS, ROUTE_CLASS, OPTION_CLASS, CITY_CLASS, AIRPORT_CLASS, CONNECTION_CLASS
 
 import ast
+from pathlib import Path
 
 from AnalysisScripts.CitySelection import CitySelection_Script, Airport
 from AnalysisScripts.RouteSelection import RouteSelection_Script
@@ -36,12 +37,13 @@ def CitySelection(request):
             general_params.save()
 
             global tier_1_2_cities
-            preprocessor = PreProcessor(tier_1_2_cities, './AnalysisScripts/PreProcessed_Datasets')
+            THIS_FOLDER = Path(__file__).parent.resolve()
+            preprocessor = PreProcessor(tier_1_2_cities, f'{THIS_FOLDER}/AnalysisScripts/PreProcessed_Datasets')
             cities, airports = CitySelection_Script(
                 general_params.__dict__,
                 preprocessor, tier_1_2_cities,
-                './RouteDev/static/RouteDev/ProcessingOutputs',
-                './RouteDev/static/RouteDev/ProcessingOutputs'
+                f'{THIS_FOLDER}/RouteDev/static/RouteDev/ProcessingOutputs',
+                f'{THIS_FOLDER}/RouteDev/static/RouteDev/ProcessingOutputs'
             )
 
             CITY_CLASS.objects.all().delete()
@@ -144,13 +146,14 @@ def RouteSelection(request):
             
             general_params = GENERAL_PARAMS_CLASS.objects.all()[0]
             global tier_1_2_cities
-            preprocessor = PreProcessor(tier_1_2_cities, './AnalysisScripts/PreProcessed_Datasets')
+            THIS_FOLDER = Path(__file__).parent.resolve()
+            preprocessor = PreProcessor(tier_1_2_cities, f'{THIS_FOLDER}/AnalysisScripts/PreProcessed_Datasets')
             routes = RouteSelection_Script(
                 selected_city_name, AIRPORT_dict,
                 general_params.__dict__,
                 preprocessor, tier_1_2_cities,
-                './RouteDev/static/RouteDev/ProcessingOutputs',
-                './RouteDev/static/RouteDev/ProcessingOutputs'
+                f'{THIS_FOLDER}/RouteDev/static/RouteDev/ProcessingOutputs',
+                f'{THIS_FOLDER}/RouteDev/static/RouteDev/ProcessingOutputs'
             )
             
             ROUTE_CLASS.objects.all().delete()
@@ -386,13 +389,14 @@ def CostResourceAnalysis(request):
                 route_params.save()
             
             global tier_1_2_cities
-            preprocessor = PreProcessor(tier_1_2_cities, './AnalysisScripts/PreProcessed_Datasets')
+            THIS_FOLDER = Path(__file__).parent.resolve()
+            preprocessor = PreProcessor(tier_1_2_cities, f'{THIS_FOLDER}/AnalysisScripts/PreProcessed_Datasets')
             options = CostResourceAnalysis_Script(
                 selected_route_info,
                 general_params.__dict__, route_params.__dict__,
                 preprocessor,
-                './RouteDev/static/RouteDev/ProcessingOutputs',
-                './RouteDev/static/RouteDev/ProcessingOutputs'
+                f'{THIS_FOLDER}/RouteDev/static/RouteDev/ProcessingOutputs',
+                f'{THIS_FOLDER}/RouteDev/static/RouteDev/ProcessingOutputs'
             )
             print(options)
 
