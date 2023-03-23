@@ -46,7 +46,7 @@
                     <h1>NEW ROUTE<br>CANDIDATES</h1>
                 </div>
                 <div id="routes">
-                    {% for route in routes_info %}
+                    {% for route, div in routes_divs_info %}
                     <div id="Route{{ forloop.counter }}" class="route">
                         <div class="route-title">
                             <h1>{{ route.CITY.NAME }} &#x21D4; {{ route.AIRPORT.NAME }}</h1>
@@ -57,18 +57,68 @@
                     </div>
                     <div id="RouteModal{{ forloop.counter }}" class="RouteModal">
                         <div class="modal-content-outer">
-                            <span class="close" id="close{{ forloop.counter }}">&times;</span>
-                            <div>
-                                <h1>{{ route.CITY.NAME }} &#x21D4; {{ route.AIRPORT.NAME }}</h1>
-                                <h3>DISTANCE: {{ route.DISTANCE }}, DURATION: {{ route.DURATION_IN }}, {{ route.DURATION_OUT }}</h3>
-                                <h4>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Pariatur, cum, voluptates, hic esse eum iste deleniti obcaecati perspiciatis labore quo atque at explicabo. Quis vitae quam, odio dicta qui reiciendis?</h4>
-                                <h3>PASSENGER DEMAND TILL {{ general_param_info.FORECAST_YEAR }} EXPECTED TO GROW BY {{ route.GROWTH }}</h3>
-                                <h3>{{ route.PRICE_IN_MARKET }}, {{ route.NUM_IN_MARKET }} - {{ route.PRICE_OUT_MARKET }}, {{ route.NUM_OUT_MARKET }}</h3>
-                                <form action="{% url 'RouteDev:CostResourceAnalysis' %}" method="post">
-                                    {% csrf_token %}
-                                    <button name="SELECTED_ROUTE_{{ route.CITY.NAME }}_{{ route.AIRPORT.AIRPORT_NAME }}">SELECT ROUTE</button>
-                                </form>
-                                <iframe src="{% static 'RouteDev/CostDemand.html' %}" frameborder="0" width="100%" height="800px"></iframe>
+                            <div class="close_button">
+                                <span class="close" id="close{{ forloop.counter }}">&times;</span>
+                            </div>
+                            <div class="modal-content">
+                                <div class="modal-content-info">
+                                    <div class="modal-title">
+                                        <div class="modal-title-header1">
+                                            <h1>{{ route.CITY.AIRPORT_NAME }}</h1>
+                                            <h1>&harr;</h1>
+                                            <h1>{{ route.AIRPORT.AIRPORT_NAME }}</h1>
+                                        </div>
+                                        <div class="modal-title-header2">
+                                            <h2>{{ route.CITY.NAME }}</h2>
+                                            <h3>DISTANCE: {{ route.DISTANCE }} MILES<br>DURATION: {{ route.DURATION }} MINS</h3>
+                                            <h2>{{ route.AIRPORT.NAME }}</h2>
+                                        </div>
+                                        <!-- <div class="modal-title-header3">
+                                            <h3>( DURATION: {{ route.DURATION }} MINS , DISTANCE: {{ route.DISTANCE }} MILES )</h3>
+                                        </div> -->
+                                    </div>
+                                    <div class="market-info">
+                                        <h2>MARKET INFORMATION:</h2>
+                                        <div class="market-info-content">
+                                            <div class="market-info-table">
+                                                <table>
+                                                    <tr>
+                                                        <th></th>
+                                                        <th>{{ route.CITY.AIRPORT_NAME }}&rarr;{{ route.AIRPORT.AIRPORT_NAME }}</th>
+                                                        <th>{{ route.AIRPORT.AIRPORT_NAME }}&rarr;{{ route.CITY.AIRPORT_NAME }}</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>EXISTING FLIGHTS</th>
+                                                        <td>{{ route.NUM_OUT_MARKET }}</td>
+                                                        <td>{{ route.NUM_IN_MARKET }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>FARES</th>
+                                                        <td>{{ route.PRICE_OUT_MARKET }}</td>
+                                                        <td>{{ route.PRICE_IN_MARKET }}</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            <div class="market-railways">
+                                                <h5>RAILWAY CONNECTIVITY FOR {{ route.CITY.AIRPORT_NAME }}&harr;{{ route.AIRPORT.AIRPORT_NAME }}</h5>
+                                                <div class="market-railways-info">
+                                                    <img src="{% static 'RouteDev/RouteDev_Pics/train.png' %}" alt="Train">
+                                                    <h6>{{ route.RAILWAYS_NUM }} TRAINS, DURATION: {{ route.RAILWAYS_DURATION }} MINS<br>TOTAL CAPACITY: {{ route.RAILWAYS_CAPACITY }}</h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <h3>PASSENGER DEMAND TILL {{ general_param_info.FORECAST_YEAR }} EXPECTED TO GROW BY {{ route.GROWTH }}%</h3>
+                                    <form action="{% url 'RouteDev:CostResourceAnalysis' %}" method="post" class="select-route">
+                                        {% csrf_token %}
+                                        <button name="SELECTED_ROUTE_{{ route.CITY.NAME }}_{{ route.AIRPORT.AIRPORT_NAME }}">SELECT ROUTE</button>
+                                    </form>
+                                </div>
+                                <div class="modal-content-graphs">
+                                    {% autoescape off %}
+                                    {{ div }}
+                                    {% endautoescape %}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -76,6 +126,12 @@
                     <script src="{% static 'RouteDev/RouteSelection/RouteSelection.js' %}"></script>
                 </div>
             </div>
+        </div>
+        
+        <div id="back">
+            <a href="{% url 'HomePage:HomePage' %}">
+                <img src="{% static 'HomePage/HomePage_Pics/back.png' %}" alt="Back">
+            </a>
         </div>
 
     </body>

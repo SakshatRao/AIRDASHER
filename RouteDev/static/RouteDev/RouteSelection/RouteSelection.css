@@ -97,5 +97,219 @@ body {
     margin: 2% auto;
     background-color: var(--dark1);
     border: 3px solid var(--dark3);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
+.close_button {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    margin: 0.5% 1% 0 0;
+    cursor: pointer;
+}
+
+.close {
+    color: var(--dark3);
+    font-weight: bold;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: center;
+    margin: 0 2% 2% 2%;
+    width: 100%;
+}
+
+.modal-content-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    margin: 0 0 0 2%;
+    width: 60%;
+}
+
+.modal-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+}
+
+.modal-title-header1 {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.modal-title-header1 h1 {
+    font-size: 7em;
+    margin: 0;
+    font-weight: bolder;
+    width: 33%;
+}
+
+.modal-title-header1 h1:first-child {
+    text-align: left;
+}
+
+.modal-title-header1 h1:nth-child(2) {
+    text-align: center;
+}
+
+.modal-title-header1 h1:last-child {
+    text-align: right;
+}
+
+.modal-title-header2 {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.modal-title-header2 h2 {
+    font-size: 2em;
+    margin: 0;
+    font-weight: bolder;
+    width: 33%;
+}
+
+.modal-title-header2>h2:first-child {
+    text-align: left;
+}
+
+.modal-title-header2>h2:last-child {
+    text-align: right;
+}
+
+.modal-title-header2 h3 {
+    margin: 0 0 5% 0;
+    font-size: 1em;
+    width: 33%;
+    text-align: center;
+}
+
+.market-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.market-info>h2 {
+    margin: 3% 0 2% 0;
+}
+
+.market-info-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: stretch;
+}
+
+.market-info-table {
+    background-color: var(--light_blue);
+    width: 40%;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+tr {
+    margin: 0;
+}
+
+th, td {
+    padding: 2%;
+    width: 33%;
+    border: 3px solid var(--blue);
+    margin: 0;
+}
+
+.market-railways {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    width: 40%;
+    background-color: var(--light_blue);
+    border: 3px solid var(--blue);
+}
+
+.market-railways h5 {
+    margin: 5% 0 0 0;
+    font-size: 0.9em;
+}
+
+.market-railways-info {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.market-railways-info img {
+    width: 15%;
+    margin: 0 5% 0 0;
+}
+
+.market-railways-info h6 {
+    font-weight: lighter;
+    font-size: 0.9em;
+    margin: 5% 0 5% 0;
+}
+
+.modal-content-info>h3 {
+    margin: 5% 0 2% 0;
+    font-size: 1.5em;
+}
+
+.select-route {
+    text-decoration: none;
+    cursor: pointer;
+    background-color: var(--blue);
+    border: 2px solid var(--black);
+    margin: 2% 0 0 0;
+    width: 30%;
+}
+
+.select-route button {
+    padding: 2%;
+    width: 100%;
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--black);
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+.modal-content-graphs {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#back {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 5%;
+    z-index: 1000;
+}
+
+#back:hover {
+    width: 6%;
+}
+
+#back a img {
+    width: 100%;
+}

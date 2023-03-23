@@ -43,8 +43,9 @@ def CitySelection(request):
                 general_params.__dict__,
                 preprocessor, tier_1_2_cities,
                 f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs',
-                f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs'
+                f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs/PlotlyGraphs'
             )
+            
 
             CITY_CLASS.objects.all().delete()
             for city in cities:
@@ -98,9 +99,22 @@ def CitySelection(request):
     cities = CITY_CLASS.objects.all()
     airports = AIRPORT_CLASS.objects.all()
     connections = CONNECTION_CLASS.objects.filter(TWO_WAY_FLIGHT = False)
+    divs1 = []
+    divs2 = []
+    THIS_FOLDER = Path(__file__).parent.resolve()
+    for city in cities:
+        try:
+            div1 = open(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs/PlotlyGraphs/{city.NAME}_CitySelection_Graph1.txt', 'r').read()
+            div2 = open(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs/PlotlyGraphs/{city.NAME}_CitySelection_Graph2.txt', 'r').read()
+            divs1.append(div1)
+            divs2.append(div2)
+        except:
+            print("PROBLEM SEEN WITH PLOTLY GRAPHS!")
+            pass
     context = {
         'general_params_info': general_params,
         'cities_info': cities,
+        'cities_div_info': zip(cities, divs1, divs2),
         'airports_info': airports,
         'connections_info': connections
     }
@@ -153,7 +167,7 @@ def RouteSelection(request):
                 general_params.__dict__,
                 preprocessor, tier_1_2_cities,
                 f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs',
-                f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs'
+                f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs/PlotlyGraphs'
             )
             
             ROUTE_CLASS.objects.all().delete()
@@ -164,6 +178,10 @@ def RouteSelection(request):
                     AIRPORT = AIRPORT_CLASS.objects.filter(AIRPORT_NAME = route_params['Hub'])[0],
                     DURATION_IN = route_params['IncomingFlightDuration'],
                     DURATION_OUT = route_params['OutgoingFlightDuration'],
+                    DURATION = (route_params['IncomingFlightDuration'] + route_params['OutgoingFlightDuration']) // 2,
+                    RAILWAYS_NUM = route_params['RailwayNum'],
+                    RAILWAYS_DURATION = route_params['RailwayDuration'],
+                    RAILWAYS_CAPACITY = route_params['RailwayCapacity'],
                     DISTANCE = route_params['DISTANCE'],
                     PRESENT_DEMAND_IN = route_params['PresentYearInForecast'],
                     PRESENT_DEMAND_OUT = route_params['PresentYearOutForecast'],
@@ -190,10 +208,20 @@ def RouteSelection(request):
         not_in_routes = [x for x in airports if x not in in_routes]
         return in_routes + not_in_routes
     airports = sort_airports_based_on_routes(airports, routes)
+    divs = []
+    THIS_FOLDER = Path(__file__).parent.resolve()
+    for route in routes:
+        try:
+            div = open(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs/PlotlyGraphs/{route.CITY.NAME}-{route.AIRPORT.AIRPORT_NAME}_RouteSelection_Graph1.txt', 'r').read()
+            divs.append(div)
+        except:
+            print("PROBLEM SEEN WITH PLOTLY GRAPHS!")
+            pass
     context = {
         'general_params_info': general_params,
         'selected_city_info': selected_city,
         'routes_info': routes,
+        'routes_divs_info': zip(routes, divs),
         'airports_info': airports
     }
 

@@ -7,6 +7,10 @@ import shutil
 import os
 from collections import OrderedDict
 
+import plotly.graph_objects as go
+import plotly.offline as pyo
+from plotly.subplots import make_subplots
+
 import time
 
 def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor, tier_1_2_cities, output_save_path, plotly_save_path):
@@ -196,7 +200,7 @@ def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor,
         for airport in AIRPORTS[SELECTED_HUB_AIRPORT].from_airport_list:
             if(airport not in connecting_airports):
                 connecting_airports.append(airport)
-        
+
         expected_route_traffic_df = []
         for year in np.arange(PRESENT_YEAR, FORECAST_YEAR + 1):
             expected_route_traffic_df.append([SELECTED_CITY, selected_hub_city, year, ''])
@@ -208,12 +212,35 @@ def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor,
             for airport in connecting_airports:
                 expected_route_traffic_df.append([airport_to_city_mapping[airport.airport_info['Name']], SELECTED_CITY, year, selected_hub_city])
         expected_route_traffic_df = pd.DataFrame(expected_route_traffic_df, columns = ['From', 'To', 'Year', 'Connecting'])
-        
+
         expected_route_traffic_df = get_railways_info_features(expected_route_traffic_df)
         expected_route_traffic_df = get_route_timing_features(expected_route_traffic_df)
         expected_route_traffic_df = get_pca_vals_features(expected_route_traffic_df)
         duration_in = expected_route_traffic_df[(expected_route_traffic_df['From'] == selected_hub_city) & (expected_route_traffic_df['To'] == SELECTED_CITY)].iloc[0]['Duration_AirRoute']
         duration_out = expected_route_traffic_df[(expected_route_traffic_df['To'] == selected_hub_city) & (expected_route_traffic_df['From'] == SELECTED_CITY)].iloc[0]['Duration_AirRoute']
+
+        railway_info_out = expected_route_traffic_df[(expected_route_traffic_df['From'] == SELECTED_CITY) & (expected_route_traffic_df['To'] == selected_hub_city) & (expected_route_traffic_df['Year'] == PRESENT_YEAR)].iloc[0]
+        railway_info_in = expected_route_traffic_df[(expected_route_traffic_df['From'] == selected_hub_city) & (expected_route_traffic_df['To'] == SELECTED_CITY) & (expected_route_traffic_df['Year'] == PRESENT_YEAR)].iloc[0]
+        railway_num_out = railway_info_out['NumTrains_Railways']
+        railway_num_in = railway_info_in['NumTrains_Railways']
+        railway_duration_out = railway_info_out['Duration_Railways']
+        railway_duration_in = railway_info_in['Duration_Railways']
+        railway_capacity_out = railway_info_out['Capacity_Railways']
+        railway_capacity_in = railway_info_in['Capacity_Railways']
+
+        def check_if_both_nan(x, y):
+            if((pd.isnull(x)) & (pd.isnull(y))):
+                return "N/A"
+            else:
+                if(pd.isnull(x)):
+                    return round(y, 0)
+                elif(pd.isnull(y)):
+                    return round(x, 0)
+                else:
+                    return round((x + y) // 2, 0)
+        railway_num = check_if_both_nan(railway_num_in, railway_num_out)
+        railway_duration = check_if_both_nan(railway_duration_in, railway_duration_out)
+        railway_capacity = check_if_both_nan(railway_capacity_in, railway_capacity_out)
         
         for col_idx, col in enumerate(expected_route_traffic_df.columns):
             if(col in X_features):
@@ -221,13 +248,13 @@ def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor,
                 col_std = cols_standardization_vals[col]['std']
                 expected_route_traffic_df[col] = expected_route_traffic_df[col].fillna(col_mean)
                 expected_route_traffic_df[col] = (expected_route_traffic_df[col] - col_mean) / (col_std + 1e-20)
-        
+
         data_X = expected_route_traffic_df[X_features]
         target_mean = cols_standardization_vals[y_features[0]]['mean']
         target_std = cols_standardization_vals[y_features[0]]['std']
         pred = model.predict(data_X) * target_std + (target_mean)
         expected_route_traffic_df['ForecastedDemand'] = pd.Series(pred)
-        
+
         # Domestic Passenger Traffic would include local + connecting demand, hence excluding adding connecting demand
         CONNECTING_DEMAND_FACTOR = 0
         def adjust_connecting_demand(row):
@@ -236,7 +263,7 @@ def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor,
             else:
                 return row['ForecastedDemand'] * CONNECTING_DEMAND_FACTOR
         expected_route_traffic_df['AdjustedForecastedDemand'] = expected_route_traffic_df.apply(adjust_connecting_demand, axis = 1)
-        
+
         # Domestic Passenger Traffic would include local + connecting demand, hence excluding adding connecting demand
         CONNECTING_DEMAND_FACTOR = 0
         def adjust_connecting_demand(row):
@@ -245,13 +272,13 @@ def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor,
             else:
                 return row['ForecastedDemand'] * CONNECTING_DEMAND_FACTOR
         expected_route_traffic_df['AdjustedForecastedDemand'] = expected_route_traffic_df.apply(adjust_connecting_demand, axis = 1)
-        
+
         in_total_traffic = expected_route_traffic_df[expected_route_traffic_df['To'] == SELECTED_CITY]
         in_total_traffic = in_total_traffic.groupby('Year')['AdjustedForecastedDemand'].aggregate('sum').reset_index(drop = False)
         out_total_traffic = expected_route_traffic_df[expected_route_traffic_df['From'] == SELECTED_CITY]
         out_total_traffic = out_total_traffic.groupby('Year')['AdjustedForecastedDemand'].aggregate('sum').reset_index(drop = False)
         in_out_total_traffic = pd.merge(in_total_traffic, out_total_traffic, on = 'Year', suffixes = ('_InTraffic', '_OutTraffic'))
-        
+
         actual_present_out_traffic = valid_route_traffic_df[(valid_route_traffic_df['From'] == SELECTED_CITY) & (valid_route_traffic_df['To'] == selected_hub_city)]
         if(actual_present_out_traffic.shape[0] > 0):
             assert(actual_present_out_traffic.shape[0] == 1)
@@ -263,9 +290,9 @@ def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor,
             actual_present_in_traffic = actual_present_in_traffic.iloc[0]['Passengers_Target'] * target_std + target_mean
             in_traffic_adjustment = actual_present_in_traffic - in_out_total_traffic.iloc[0]['AdjustedForecastedDemand_InTraffic']
             in_out_total_traffic['AdjustedForecastedDemand_InTraffic'] = in_out_total_traffic['AdjustedForecastedDemand_InTraffic'] + in_traffic_adjustment
-        
+
         in_out_total_traffic.to_csv(f"{output_save_path}/Forecasted_Route_Demand/City{SELECTED_CITY}_Hub{SELECTED_HUB_AIRPORT}.csv", index = None)
-        return in_out_total_traffic, (duration_in, duration_out)
+        return in_out_total_traffic, (duration_in, duration_out, railway_num, railway_duration, railway_capacity)
 
     airport_to_city_mapping = dict(zip(preprocessor.city_mapping['AirRouteData_AirportCode'].values, preprocessor.city_mapping['City'].values))
     city_to_airport_mapping = dict(zip(preprocessor.city_mapping['City'].values, preprocessor.city_mapping['AirRouteData_AirportCode'].values))
@@ -275,12 +302,15 @@ def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor,
     os.mkdir(f"{output_save_path}/Forecasted_Route_Demand/")
     route_info_df = []
     city = selected_city
+    route_forecasted_demands_dict = {}
+
     for hub in uniq_hubs:
         SELECTED_CITY = city
         SELECTED_HUB_AIRPORT = hub
-        route_forecasted_demands, durations = get_route_demand_forecasts(SELECTED_CITY, SELECTED_HUB_AIRPORT)
+        route_forecasted_demands, durations_railway = get_route_demand_forecasts(SELECTED_CITY, SELECTED_HUB_AIRPORT)
         assert(route_forecasted_demands.iloc[0]['Year'] == PRESENT_YEAR)
         assert(route_forecasted_demands.iloc[route_forecasted_demands.shape[0] - 1]['Year'] == FORECAST_YEAR)
+        route_forecasted_demands_dict[f'{SELECTED_CITY}-{SELECTED_HUB_AIRPORT}'] = route_forecasted_demands
 
         selected_city_airport = city_to_airport_mapping[SELECTED_CITY]
         route_network_data_out = preprocessor.all_network_data[(preprocessor.all_network_data['From'] == selected_city_airport) & (preprocessor.all_network_data['To'] == SELECTED_HUB_AIRPORT)]
@@ -297,12 +327,13 @@ def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor,
         else:
             PRICE_IN_MARKET = f"${int(route_network_data_in['Cheapest Price'].mean())}"
             NUM_IN_MARKET = int(route_network_data_in['Number of Flights'].sum())
-        
+
         DISTANCE = (get_timing(selected_city_airport, SELECTED_HUB_AIRPORT)[1] + get_timing(SELECTED_HUB_AIRPORT, selected_city_airport)[1]) / 2.0
 
         route_info_df.append([
             SELECTED_CITY, SELECTED_HUB_AIRPORT,
-            durations[0], durations[1],
+            durations_railway[0], durations_railway[1],
+            durations_railway[2], durations_railway[3], durations_railway[4],
             route_forecasted_demands.iloc[0]['AdjustedForecastedDemand_InTraffic'],
             route_forecasted_demands.iloc[0]['AdjustedForecastedDemand_OutTraffic'],
             route_forecasted_demands.iloc[route_forecasted_demands.shape[0] - 1]['AdjustedForecastedDemand_InTraffic'],
@@ -311,9 +342,11 @@ def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor,
             PRICE_OUT_MARKET, PRICE_IN_MARKET,
             DISTANCE
         ])
+    
     route_info_df = pd.DataFrame(route_info_df, columns = [
         'City', 'Hub',
         'IncomingFlightDuration', 'OutgoingFlightDuration',
+        'RailwayNum', 'RailwayDuration', 'RailwayCapacity',
         'PresentYearInForecast', 'PresentYearOutForecast',
         'ForecastYearInForecast', 'ForecastYearOutForecast',
         'NUMBER_PLANES_OUT_MARKET', 'NUMBER_PLANES_IN_MARKET',
@@ -325,9 +358,63 @@ def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor,
     route_info_df['AvgGrowth'] = (route_info_df['GrowthIn'] + route_info_df['GrowthOut']) / 2.0
     route_info_df = route_info_df.sort_values('AvgGrowth', ascending = False)
     route_info_df['Route'] = route_info_df.apply(lambda x: x['City'] + '-' + x['Hub'], axis = 1)
-    route_info_df = OrderedDict(route_info_df.set_index('Route').head(5).to_dict(orient = 'index'))
+    route_info_df = route_info_df.set_index('Route').head(5)
+
+    route_forecasted_demands_dict = dict([(x, route_forecasted_demands_dict[x]) for x in route_forecasted_demands_dict if x in [*route_info_df.index]])
+
+    plotly_RouteSelection([*route_info_df.index], route_forecasted_demands_dict, plotly_save_path)
+
+    route_info_df = OrderedDict(route_info_df.to_dict(orient = 'index'))
     
     return route_info_df
+
+def plotly_RouteSelection(routes, demand_forecasts, plotly_save_path):
+    
+    for route in routes:
+
+        city, hub = route.split('-')
+        route_in_demand = demand_forecasts[route]['AdjustedForecastedDemand_InTraffic'].values[1:]
+        route_out_demand = demand_forecasts[route]['AdjustedForecastedDemand_OutTraffic'].values[1:]
+        years = demand_forecasts[route]['Year'].values[1:]
+        
+        fig1 = make_subplots(
+            rows = 2, cols = 1,
+            subplot_titles = [f"{city}→{hub}", f"{hub}→{city}"],
+            shared_xaxes = True
+        )
+        
+        fig1.add_trace(
+            go.Bar(
+                x = years, y = route_out_demand,
+                hovertext = [f"Year: {x}<br>Passenger Forecast: {int(y)}" for x, y in zip(years, route_out_demand)],
+                hoverinfo = 'text', marker = dict(color = '#2C88D9')
+            ),
+            row = 1, col = 1
+        )
+        
+        fig1.add_trace(
+            go.Bar(
+                x = years, y = route_in_demand,
+                hovertext = [f"Year: {x}<br>Passenger Forecast: {int(y)}" for x, y in zip(years, route_in_demand)],
+                hoverinfo = 'text', marker = dict(color = '#2C88D9')
+            ),
+            row = 2, col = 1
+        )
+        
+        fig1.update_layout(
+            title_text = f"Forecasted Total Air-traffic Demand",
+            height = 700, width = 500,
+            paper_bgcolor = '#DBD8FD' , plot_bgcolor = '#DBD8FD',
+            titlefont = dict(size = 20),
+            showlegend = False
+        )
+        
+        # if(route == routes[0]):
+        #     pyo.plot(fig1, output_type = 'file', filename = f'{plotly_save_path}/{route}_RouteSelection.html', config = {"displayModeBar": False, "showTips": False})
+        
+        div1 = pyo.plot(fig1, output_type = 'div', include_plotlyjs = False, show_link = False, link_text = "", config = {"displayModeBar": False, "showTips": False})
+        with open(f'{plotly_save_path}/{route}_RouteSelection_Graph1.txt', 'w') as save_file:
+            save_file.write(div1)
 
 # # Testing
 # from CitySelection import CitySelection_Script

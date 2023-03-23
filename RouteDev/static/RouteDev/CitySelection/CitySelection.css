@@ -41,7 +41,7 @@ body {
 
 #right-pane-title {
     text-align: center;
-    margin: 5% 0 0 0;
+    margin: 2% 0 0 0;
 }
 
 #right-pane-title h1 {
@@ -56,7 +56,7 @@ body {
     justify-content: flex-start;
     text-align: center;
     width: 90%;
-    margin: 0 0 5% 0;
+    margin: 0 0 0 0;
 }
 
 .city {
@@ -66,8 +66,8 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin: 1% 0;
     padding: 2% 0;
+    margin: 0.5% 0;
 }
 
 .city:hover {
@@ -78,7 +78,7 @@ body {
 
 .city-title h1 {
     margin: 0 0;
-    font-size: 3em;
+    font-size: 2em;
 }
 
 .city-info h3 {
@@ -100,14 +100,89 @@ body {
     margin: 2% auto;
     background-color: var(--dark1);
     border: 3px solid var(--dark3);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.close_button {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    margin: 0.5% 1% 0 0;
+    cursor: pointer;
+}
+
+.close {
+    color: var(--dark3);
+    font-weight: bold;
+}
+
+.modal-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.modal-title h1 {
+    font-size: 3em;
+    margin: 0;
+    font-weight: bolder;
+}
+
+.modal-title h3 {
+    margin: 0.5% 0 1% 0;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin: 0 2% 2% 2%;
+}
+
+.modal-content-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    margin: 0 2% 0 0;
+}
+
+.modal-content-graphs {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.select-city {
+    text-decoration: none;
+    cursor: pointer;
+    background-color: var(--blue);
+    border: 2px solid var(--black);
+    width: 50%;
+}
+
+.select-city button {
+    padding: 2%;
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--black);
+    font-size: 1.5em;
+    cursor: pointer;
+    width: 100%;
 }
 
 #params {
-    width: 100%;
+    width: 80%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    border: 2px solid var(--black);
+    margin: 0 2%;
+    padding: 2% 2%;
 }
 
 #params-config {
@@ -134,5 +209,21 @@ body {
     color: var(--white);
     padding: 8px 15px;
     cursor: pointer;
+    width: 100%;
+}
+
+#back {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 5%;
+    z-index: 1000;
+}
+
+#back:hover {
+    width: 6%;
+}
+
+#back a img {
     width: 100%;
 }

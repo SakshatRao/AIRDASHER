@@ -17,6 +17,7 @@ class GENERAL_PARAMS_CLASS(models.Model):
 
 class CITY_CLASS(models.Model):
     NAME = models.CharField(max_length = 30)
+    INFO = models.CharField(max_length = 100, default = '')
     AIRPORT_NAME = models.CharField(max_length = 3)
     GROWTH_RATE = models.FloatField()
     FORECASTED_DEMAND = models.IntegerField()
@@ -51,6 +52,10 @@ class ROUTE_CLASS(models.Model):
     AIRPORT = models.ForeignKey(AIRPORT_CLASS, on_delete = models.CASCADE, related_name = 'from_city', null = True)
     DURATION_IN = models.IntegerField()
     DURATION_OUT = models.IntegerField()
+    DURATION = models.IntegerField(default = 0)
+    RAILWAYS_NUM = models.IntegerField(default = 0)
+    RAILWAYS_DURATION = models.CharField(default = '', max_length = 10)
+    RAILWAYS_CAPACITY = models.CharField(default = '', max_length = 10)
     DISTANCE = models.IntegerField()
     PRESENT_DEMAND_IN = models.IntegerField()
     PRESENT_DEMAND_OUT = models.IntegerField()

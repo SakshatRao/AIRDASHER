@@ -55,7 +55,7 @@
                     <h1>HIGH-GROWTH CITIES</h1>
                 </div>
                 <div id="cities">
-                    {% for city in cities_info %}
+                    {% for city, div1, div2 in cities_div_info %}
                         <div id="City{{ forloop.counter }}" class="city">
                             <div class="city-title">
                                 <h1>{{ city.NAME }}</h1>
@@ -66,17 +66,28 @@
                         </div>
                         <div id="CityModal{{ forloop.counter }}" class="CityModal">
                             <div class="modal-content-outer">
-                                <span class="close" id="close{{ forloop.counter }}">&times;</span>
-                                <div>
-                                    <h1>{{ city.NAME }}</h1>
-                                    <h3>{{ city.AIRPORT_NAME }}</h3>
-                                    <h4>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Pariatur, cum, voluptates, hic esse eum iste deleniti obcaecati perspiciatis labore quo atque at explicabo. Quis vitae quam, odio dicta qui reiciendis?</h4>
-                                    <h3>PASSENGER DEMAND TILL {{ general_param_info.FORECAST_YEAR }} EXPECTED TO GROW BY {{ city.GROWTH_RATE }}</h3>
-                                    <form action="{% url 'RouteDev:RouteSelection' %}" method="post">
-                                        {% csrf_token %}
-                                        <button name="SELECTED_CITY_{{ city.NAME }}">SELECT CITY</button>
-                                    </form>
-                                    <iframe src="{% static 'RouteDev/CostDemand.html' %}" frameborder="0" width="100%" height="800px"></iframe>
+                                <div class="close_button">
+                                    <span class="close" id="close{{ forloop.counter }}">&times;</span>
+                                </div>
+                                <div class="modal-content">
+                                    <div class="modal-content-info">
+                                        <div class="modal-title">
+                                            <h1>{{ city.NAME }}</h1>
+                                            <h3>AIRPORT: {{ city.AIRPORT_NAME }}</h3>
+                                        </div>
+                                        <h4>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Pariatur, cum, voluptates, hic esse eum iste deleniti obcaecati perspiciatis labore quo atque at explicabo. Quis vitae quam, odio dicta qui reiciendis?</h4>
+                                        <h3>PASSENGER DEMAND TILL {{ general_params_info.FORECAST_YEAR }} EXPECTED TO GROW BY {{ city.GROWTH_RATE }}%</h3>
+                                        <form action="{% url 'RouteDev:RouteSelection' %}" method="post" class="select-city">
+                                            {% csrf_token %}
+                                            <button name="SELECTED_CITY_{{ city.NAME }}">SELECT CITY</button>
+                                        </form>
+                                    </div>
+                                    <div class="modal-content-graphs">
+                                        {% autoescape off %}
+                                        {{ div1 }}
+                                        {{ div2 }}
+                                        {% endautoescape %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -88,7 +99,7 @@
                     <div id="params-config">
                         <div class="param-config">
                             <label>FORECAST YEAR:</label>
-                            <input type="number" name="NEW_FORECAST_YEAR" id="FORECAST_YEAR" value="{{ general_params_info.FORECAST_YEAR }}">
+                            <input type="number" name="NEW_FORECAST_YEAR" id="FORECAST_YEAR" value="{{ general_params_info.FORECAST_YEAR }}" min="2023" max="2043" step="1">
                         </div>
                         <div class="param-config">
                             <label>Sample:</label>
@@ -103,6 +114,12 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div id="back">
+            <a href="{% url 'HomePage:HomePage' %}">
+                <img src="{% static 'HomePage/HomePage_Pics/back.png' %}" alt="Back">
+            </a>
         </div>
     
     </body>

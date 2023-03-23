@@ -9,6 +9,10 @@ import os
 import time
 import json
 
+import plotly.graph_objects as go
+import plotly.offline as pyo
+from plotly.subplots import make_subplots
+
 from collections import OrderedDict
 
 class Airport:
@@ -410,11 +414,12 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
 
     model = LinearModel(preprocessor.CitySelection_model_coefs)
 
-    def get_forecasted_values(total_dataset_raw, FORECAST_YEAR):
+    def get_forecasted_values(total_dataset_raw, FORECAST_YEAR, get_plot_info = False):
         total_dataset = total_dataset_raw.copy()
         history_to_latest_feature_mapping = dict(zip(history_features, ['_'.join(x.split('_history')[0].split('_')[:-1]) + '_latest' for x in history_features if '_'.join(x.split('_history')[0].split('_')[:-1]) + '_latest' in latest_features]))
         growth = np.zeros((total_dataset.shape[0], len(history_features)))
         forecasts = np.zeros((total_dataset.shape[0], len(history_features)))
+        all_plot_info = {}
         for feature_idx, feature in enumerate(history_features):
             for idx, row in total_dataset.iterrows():
                 city_history_feature = row[feature]
@@ -435,16 +440,36 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
                             duration = 10
                         else:
                             print("ALERT: Invalid duration provided!")
-                        forecast_idx = (FORECAST_YEAR - PRESENT_YEAR) / duration + len(city_history_feature) - 1
+                        forecast_idx = (FORECAST_YEAR - city_history_latestyear) / duration + len(city_history_feature) - 1
                         forecast = np.exp(curve_fit[0] * forecast_idx + curve_fit[1]) - 1
                         forecasts[idx, feature_idx] = forecast
+                        # For visualizing the growths
+                        if((feature in ['GDP_economic_1y_history', 'Domestic_tourism_1y_history', '25-29_Graduates_education_10y_history', 'Population_population_10y_history']) and (get_plot_info == True)):
+                            long_x = [*x] + [*np.arange(x[-1] + 1, int(forecast_idx) + 1)]
+                            if(long_x[-1] != forecast_idx):
+                                long_x.append(forecast_idx)
+                            long_x = np.asarray(long_x)
+                            all_years = [(val + 1 - len(city_history_feature)) * duration + city_history_latestyear for val in long_x]
+                            x_years = [(val + 1 - len(city_history_feature)) * duration + city_history_latestyear for val in x]
+                            fit_y = np.exp(curve_fit[0] * long_x + curve_fit[1])
+
+                            plot_info = {}
+                            plot_info['x_years'] = x_years
+                            plot_info['y'] = y
+                            plot_info['all_years'] = all_years
+                            plot_info['fit_y'] = fit_y
+                            plot_info['forecast'] = forecast
+                            plot_info['growth'] = curve_fit[0]
+                            plot_info['duration'] = duration
+
+                            all_plot_info[f'{row["City"]}_{feature}'] = plot_info
                     else:
                         growth[idx, feature_idx] = np.nan
                         forecasts[idx, feature_idx] = y[0]
                 else:
                     growth[idx, feature_idx] = np.nan
                     forecasts[idx, feature_idx] = row[history_to_latest_feature_mapping[feature]]
-
+        
         growth_df = pd.DataFrame(growth, columns = ['_'.join(x.split('_history')[0].split('_')[:-1]) + '_growth' for x in history_features])
         growth_df = growth_df.fillna(0)
         forecasts_df = pd.DataFrame(forecasts, columns = ['_'.join(x.split('_history')[0].split('_')[:-1]) + '_forecast' for x in history_features])
@@ -515,12 +540,22 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
         new_pred_traffic[new_pred_traffic < 0] = 0
         new_pred_traffic_df = pd.DataFrame.from_dict({'City': new_total_valid_data['City'].values, 'PredictedFutureTraffic': new_pred_traffic}, orient = 'columns')
 
-        return new_data_pca_X_df, new_pred_traffic_df, [new_total_valid_data, total_dataset]
+        if(get_plot_info):
+            return new_data_pca_X_df, new_pred_traffic_df, [new_total_valid_data, total_dataset], all_plot_info
+        else:
+            return new_data_pca_X_df, new_pred_traffic_df, [new_total_valid_data, total_dataset]
 
     shutil.rmtree(f"{output_save_path}/Forecasted_Features/", ignore_errors = True)
     os.mkdir(f"{output_save_path}/Forecasted_Features/")
+    all_pred_traffic = pd.DataFrame()
     for year in range(PRESENT_YEAR, FORECAST_YEAR + 1):
-        new_data_pca_X_df, new_pred_traffic_df, debug_info = get_forecasted_values(total_dataset, year)
+        if(year == FORECAST_YEAR):
+            new_data_pca_X_df, new_pred_traffic_df, debug_info, plot_info = get_forecasted_values(total_dataset, year, True)
+        else:
+            new_data_pca_X_df, new_pred_traffic_df, debug_info = get_forecasted_values(total_dataset, year, False)
+        pred_traffic_df = new_pred_traffic_df.copy()
+        pred_traffic_df['Year'] = pd.Series(np.repeat(year, pred_traffic_df.shape[0]))
+        all_pred_traffic = pd.concat([all_pred_traffic, pred_traffic_df], axis = 0)
         if(year != PRESENT_YEAR):
             new_data_pca_X_df.to_csv(f'{output_save_path}/Forecasted_Features/{year}.csv', index = None)
         else:
@@ -612,7 +647,143 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
     airport_to_city_mapping = dict(zip(preprocessor.city_mapping['AirRouteData_AirportCode'].values, preprocessor.city_mapping['City'].values))
     most_growth_cities = most_growth_cities[~most_growth_cities['City'].isin([airport_to_city_mapping[x] for x in AIRPORTS])]
 
+    most_growth_cities_names = most_growth_cities['City'].values[:5]
+    plot_info_keys = [[x for x in plot_info if x.startswith(y)] for y in most_growth_cities_names]
+    plot_info_all_keys = []
+    for x in plot_info_keys:
+        plot_info_all_keys.extend(x)
+    sel_pred_traffic = all_pred_traffic[all_pred_traffic['City'].isin(most_growth_cities_names)]
+    plotly_CitySelection(most_growth_cities_names, [(x, plot_info[x]) for x in plot_info_all_keys], sel_pred_traffic, plotly_save_path)
+    
     return OrderedDict(most_growth_cities.set_index('City').head(5).to_dict(orient = 'index')), AIRPORTS
+
+def plotly_CitySelection(cities, plot_info, pred_traffic, plotly_save_path):
+    
+    for city in cities:
+        fig1 = make_subplots(
+            rows = 1, cols = 1
+        )
+
+        city_demand = pred_traffic[pred_traffic['City'] == city].sort_values('Year')
+        year = city_demand['Year'].values
+        year_idx = np.arange(year.shape[0])
+        vals = city_demand['PredictedFutureTraffic'].values
+        fig1.add_trace(
+            go.Bar(
+                x = year, y =vals,
+                hovertext = [f"Year: {x}<br>Passenger Forecast: {int(y)}" for x, y in zip(year, vals)],
+                hoverinfo = 'text', marker = dict(color = '#2C88D9')
+            ),
+            row = 1, col = 1
+        )
+        
+        fig1.update_layout(
+            title_text = f"Forecasted Total Air-traffic Demand for {city}",
+            height = 700, width = 500,
+            paper_bgcolor = '#DBD8FD' , plot_bgcolor = '#DBD8FD',
+            titlefont = dict(size = 20),
+        )
+        
+        cols = ['Population_population_10y_history', 'GDP_economic_1y_history', '25-29_Graduates_education_10y_history', 'Domestic_tourism_1y_history']
+        factors = ['Population', 'Economics', 'Education', 'Tourism']
+        
+        subplot_names = [''] * 4
+        for city_col_name, col_info in plot_info:
+            col_name = '_'.join(city_col_name.split('_')[1:])
+    
+            if(city_col_name.startswith(city)):
+                if(col_info['growth'] > 0):
+                    behavior = 'double'
+                elif(col_info['growth'] < 0):
+                    behavior = 'halve'
+                else:
+                    behavior = 'constant'
+                if(behavior != 'constant'):
+                    subplot_names[cols.index(col_name)] = f"<b>{factors[cols.index(col_name)]}</b>: Doubles every {round(np.log(2) / col_info['growth'] * col_info['duration'], 1)} yrs"
+                else:
+                    subplot_names[cols.index(col_name)] = f"<b>{factors[cols.index(col_name)]}</b>: Expected to remain constant"
+        
+        fig2 = make_subplots(
+            rows = 2, cols = 2,
+            vertical_spacing = 0.1,
+            horizontal_spacing = 0.1,
+            subplot_titles = subplot_names
+        )
+        
+        legend_mapping_done = False
+        
+        for col_idx, (city_col_name, col_info) in enumerate(plot_info):
+            
+            col_name = '_'.join(city_col_name.split('_')[1:])
+            
+            if(legend_mapping_done == False):
+                showlegend_dict = {'showlegend': True}
+            else:
+                showlegend_dict = {'showlegend': False}
+    
+            if(city_col_name.startswith(city)): 
+            
+                fig2.add_trace(
+                    go.Scatter(
+                        x = col_info['x_years'], y = np.exp(col_info['y']) - 1,
+                        mode = 'markers', marker = dict(color = '#F7C325', size = 10),
+                        hovertemplate = None, hoverinfo = "skip",
+                        name = 'Historical Data', legendgroup = f"{col_idx}1", **showlegend_dict
+                    ),
+                    row = cols.index(col_name) // 2 + 1, col = cols.index(col_name) % 2 + 1
+                )
+                
+                fig2.add_trace(
+                    go.Scatter(
+                        x = col_info['all_years'], y = col_info['fit_y'] - 1,
+                        mode = 'lines', line = dict(color = '#2C88D9'),
+                        hovertemplate = None, hoverinfo = "skip",
+                        name = 'Fitted Exponential Curve', legendgroup = f"{col_idx}2", **showlegend_dict
+                    ),
+                    row = cols.index(col_name) // 2 + 1, col = cols.index(col_name) % 2 + 1
+                )
+                
+                fig2.add_trace(
+                    go.Scatter(
+                        x = [col_info['all_years'][-1]], y = [col_info['forecast']],
+                        mode = 'markers', marker = dict(color = '#2C88D9', size = 15, opacity = 0.3),
+                        hovertemplate = None, hoverinfo = "skip",
+                        name = 'Forecast', legendgroup = f"{col_idx}3", **showlegend_dict
+                    ),
+                    row = cols.index(col_name) // 2 + 1, col = cols.index(col_name) % 2 + 1
+                )
+                
+                legend_mapping_done = True
+            
+        fig2.update_layout(
+            title_text = f"Doubling period for various Macro-Economic Factors",
+            titlefont = dict(size = 20),
+            paper_bgcolor = '#DBD8FD' , plot_bgcolor = '#DBD8FD',
+            height = 700, width = 700,
+            legend = dict(
+                orientation="h",
+                yanchor="top",
+                y=-0.05,
+                xanchor="right",
+                x=1,
+                itemclick="toggleothers",
+                itemdoubleclick="toggle",
+            )
+        )
+        fig2.update_yaxes(automargin = True)
+        fig2.update_xaxes(automargin = True)
+        fig2.update_annotations(font_size = 15)
+        
+        #if(city == cities[0]):
+        #   pyo.plot(fig1, output_type = 'file', filename = f'{plotly_save_path}/CityRouteSelection.html', config = {"displayModeBar": False, "showTips": False})
+        #   pyo.plot(fig2, output_type = 'file', filename = f'{plotly_save_path}/{city}_CityRouteSelection2.html', config = {"displayModeBar": False, "showTips": False})
+        
+        div1 = pyo.plot(fig1, output_type = 'div', include_plotlyjs = False, show_link = False, link_text = "", config = {"displayModeBar": False, "showTips": False})
+        with open(f'{plotly_save_path}/{city}_CitySelection_Graph1.txt', 'w') as save_file:
+            save_file.write(div1)
+        div2 = pyo.plot(fig2, output_type = 'div', include_plotlyjs = False, show_link = False, link_text = "", config = {"displayModeBar": False, "showTips": False})
+        with open(f'{plotly_save_path}/{city}_CitySelection_Graph2.txt', 'w') as save_file:
+            save_file.write(div2)
 
 # # Testing
 # tier_1_2_cities = [
@@ -629,7 +800,7 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
 #     'SAMPLE_NAME': 'Sample1'
 # }
 # t1 = time.time()
-# most_growth_cities, airports = CitySelection_Script(general_params, preprocessor, tier_1_2_cities, './Final_Analysis_Scripts/Temporary_Outputs', './Final_Analysis_Scripts/Temporary_Outputs')
+# most_growth_cities, airports = CitySelection_Script(general_params, preprocessor, tier_1_2_cities, './Final_Analysis_Scripts/Temporary_Outputs', './Final_Analysis_Scripts/Temporary_Outputs/PlotlyGraphs')
 # print(f"Time taken for CitySelection: {(time.time() - t1):.2f}s")
 # print(most_growth_cities)
 # print([(x, airports[x].airport_info) for x in airports])
