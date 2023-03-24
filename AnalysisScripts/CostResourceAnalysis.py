@@ -1,6 +1,10 @@
 import numpy as np
 import pandas as pd
 
+import plotly.graph_objects as go
+import plotly.offline as pyo
+from plotly.subplots import make_subplots
+
 import time
 
 def CostResourceAnalysis_Script(selected_route, general_params, route_params, preprocessor, output_save_path, plotly_save_path):
@@ -348,6 +352,23 @@ def CostResourceAnalysis_Script(selected_route, general_params, route_params, pr
 
     trimmed_route_info = route_info.copy()
     for solution_idx in np.arange(len(trimmed_route_info['Solutions'])):
+
+        plotly_CostResourceAnalysis(
+            solution_idx,
+            selected_city_airport, SELECTED_HUB_AIRPORT,
+            trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['years'],
+            trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['EXPENSES'],
+            trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['EARNINGS'],
+            trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['PROFIT_MARGIN_LIST'],
+            trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['total_demands'],
+            trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['total_capacities'],
+            trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['total_flight_vacancies'],
+            trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['profitability_year'],
+            trimmed_route_info['OtherInfo']['MARKET_SHARE_IN'],
+            trimmed_route_info['OtherInfo']['MARKET_SHARE_OUT'],
+            plotly_save_path
+        )
+
         trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['years'] = trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['years'][-1]
         trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['EXPENSES'] = trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['EXPENSES'][-1]
         trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['EARNINGS'] = trimmed_route_info['Solutions'][solution_idx]['cost_resource_analysis']['EARNINGS'][-1]
@@ -359,6 +380,202 @@ def CostResourceAnalysis_Script(selected_route, general_params, route_params, pr
         #     pass
 
     return trimmed_route_info
+
+def plotly_CostResourceAnalysis(option_idx, CITY_AIRPORT, HUB_AIRPORT, years, EXPENSES, EARNINGS, PROFIT_MARGIN_LIST, total_demands, total_capacities, total_flight_vacancies, profitability_year, MARKET_SHARE_IN, MARKET_SHARE_OUT, plotly_save_path):
+    
+    fig1 = make_subplots(
+        rows = 2, cols = 1,
+        subplot_titles = [f"FOR {CITY_AIRPORT}→{HUB_AIRPORT} ROUTE", f"FOR {HUB_AIRPORT}→{CITY_AIRPORT} ROUTE"],
+        specs=[[{"type": "pie"}], [{"type": "pie"}]]
+    )
+    
+    fig1.add_trace(
+        go.Pie(
+            labels = ['AIRLINE', 'COMPETITORS'], values = [round(MARKET_SHARE_OUT, 2), 1 - round(MARKET_SHARE_OUT, 2)],
+            pull = [0.1, 0],
+            marker = dict(colors = ['#2C88D9', '#BBD8F2'], line = dict(color = '#2e353b', width = 1)),
+            hoverinfo = "label+percent", textinfo = 'none',
+        ),
+        row = 1, col = 1
+    )
+    
+    fig1.add_trace(
+        go.Pie(
+            labels = ['AIRLINE', 'COMPETITORS'], values = [round(MARKET_SHARE_IN, 2), 1 - round(MARKET_SHARE_IN, 2)],
+            pull = [0.1, 0],
+            marker = dict(colors = ['#2C88D9', '#BBD8F2'], line = dict(color = '#2e353b', width = 1)),
+            hoverinfo = "label+percent", textinfo = 'none',
+        ),
+        row = 2, col = 1
+    )
+    
+    fig1.update_layout(
+        title_text = f"MARKET SHARE:",
+        height = 700, width = 250,
+        paper_bgcolor = '#DBD8FD' , plot_bgcolor = '#DBD8FD',
+        titlefont = dict(size = 20),
+        margin=dict(l=0,r=0),
+        autosize = True,
+        showlegend = False
+    )
+    
+    if(profitability_year is None):
+        text = "PROFIT MARGINS"
+    else:
+        text = f"PROFITABILITY EXPECTED BY {profitability_year}"
+    fig2 = make_subplots(
+        rows = 2, cols = 1,
+        subplot_titles = [f"CUMULATIVE EARNINGS VS. EXPENSES", text],
+    )
+    
+    fig2.add_trace(
+        go.Line(
+            x = years, y = np.cumsum(EARNINGS), name = 'Earnings',
+            hovertext = [f"Year: {x}<br>Total Cumulative Earnings: ${y:.1f}" for x, y in zip(years, np.cumsum(EARNINGS))],
+            hoverinfo = 'text', line = dict(color = '#2C88D9')
+        ),
+        row = 1, col = 1
+    )
+    
+    fig2.add_trace(
+        go.Line(
+            x = years, y = np.cumsum(EXPENSES), name = 'Expenses',
+            hovertext = [f"Year: {x}<br>Total Cumulative Expenses: ${y:.1f}" for x, y in zip(years, np.cumsum(EXPENSES))],
+            hoverinfo = 'text', line = dict(color = '#F7C325')
+        ),
+        row = 1, col = 1
+    )
+    
+    fig2.update_layout(
+        title_text = "PROFITABILITY",
+        height = 700, width = 450,
+        paper_bgcolor = '#DBD8FD' , plot_bgcolor = '#DBD8FD',
+        titlefont = dict(size = 20),
+        shapes=[{
+            'type': 'line',
+            'x0': years[0],
+            'y0': 0,
+            'x1': years[-1],
+            'y1': 0,
+            'yref': 'y2',
+            'line': {
+                'color': '#2e353b',
+                'width': 2,
+                'dash': 'dash'
+            }
+        }],
+        spikedistance=1000,
+        hoverdistance=100,
+        hovermode = 'x',
+        legend = dict(
+            orientation="h",
+            yanchor="top",
+            y=0.57,
+            xanchor="right",
+            x=1,
+            itemclick="toggleothers",
+            itemdoubleclick="toggle",
+        )
+    )
+
+    fig2.add_trace(
+        go.Line(
+            x = years, y = PROFIT_MARGIN_LIST, name = 'Profit Margins',
+            hovertext = [f"Year: {x}<br>Profit Margin: {y:.1f}%" for x, y in zip(years, PROFIT_MARGIN_LIST)],
+            hoverinfo = 'text', line = dict(color = '#2C88D9'),
+            showlegend = False,
+            yaxis = 'y2',
+            fill = 'tozeroy'
+        ),
+        row = 2, col = 1
+    )
+    
+    fig2.update_yaxes(
+        zeroline = False,
+        showgrid = False
+    )
+    
+    fig2.update_xaxes(
+        showspikes = True, spikethickness=2, spikecolor="#596673", spikedash='dot', spikemode="across"
+    )
+    
+    fig3 = make_subplots(
+        rows = 2, cols = 1,
+        subplot_titles = [f"DEMAND VS. CAPACITY", "OCCUPANCY RATE"],
+    )
+    
+    fig3.add_trace(
+        go.Line(
+            x = years, y = total_demands, name = 'Demand',
+            hovertext = [f"Year: {x}<br>Total Demand: {y:.1f}" for x, y in zip(years, total_demands)],
+            hoverinfo = 'text', line = dict(color = '#F7C325'),
+            fill = 'tozeroy'
+        ),
+        row = 1, col = 1
+    )
+    
+    fig3.add_trace(
+        go.Line(
+            x = years, y = total_capacities, name = 'Capacity',
+            hovertext = [f"Year: {x}<br>Total Capacity: {y:.1f}" for x, y in zip(years, total_capacities)],
+            hoverinfo = 'text', line = dict(color = '#2C88D9'),
+            fill = 'tonexty',
+        ),
+        row = 1, col = 1
+    )
+    
+    fig3.add_trace(
+        go.Line(
+            x = years, y = [100*(1-x) for x in total_flight_vacancies], name = 'Occupancy Rate',
+            hovertext = [f"Year: {x}<br>Profit Margin: {y:.1f}%" for x, y in zip(years, [100*(1-x) for x in total_flight_vacancies])],
+            hoverinfo = 'text', line = dict(color = '#2C88D9'),
+            showlegend = False
+        ),
+        row = 2, col = 1
+    )
+    
+    fig3.update_layout(
+        title_text = "DEMAND FULFILMENT",
+        height = 700, width = 450,
+        paper_bgcolor = '#DBD8FD' , plot_bgcolor = '#DBD8FD',
+        titlefont = dict(size = 20),
+        spikedistance=1000,
+        hoverdistance=100,
+        hovermode = 'x',
+        legend = dict(
+            orientation="h",
+            yanchor="top",
+            y=0.57,
+            xanchor="right",
+            x=1,
+            itemclick="toggleothers",
+            itemdoubleclick="toggle",
+        )
+    )
+    
+    fig3.update_yaxes(
+        zeroline = False,
+        showgrid = False
+    )
+    
+    fig3.update_xaxes(
+        showspikes = True, spikethickness=2, spikecolor="#596673", spikedash='dot', spikemode="across"
+    )
+    
+    # if(option_idx == 0):
+    #     #pyo.plot(fig1, output_type = 'file', filename = f'{plotly_save_path}/CostResourceAnalysis_Graph{option_idx+1}1.html', config = {"displayModeBar": False, "showTips": False})
+    #     #pyo.plot(fig2, output_type = 'file', filename = f'{plotly_save_path}/CostResourceAnalysis_Graph{option_idx+1}2.html', config = {"displayModeBar": False, "showTips": False})
+    #     pyo.plot(fig3, output_type = 'file', filename = f'{plotly_save_path}/CostResourceAnalysis_Graph{option_idx+1}2.html', config = {"displayModeBar": False, "showTips": False})
+    
+    div1 = pyo.plot(fig1, output_type = 'div', include_plotlyjs = False, show_link = False, link_text = "", config = {"displayModeBar": False, "showTips": False})
+    with open(f'{plotly_save_path}/CostResourceAnalysis_Graph{option_idx+1}1.txt', 'w') as save_file:
+        save_file.write(div1)
+    div2 = pyo.plot(fig2, output_type = 'div', include_plotlyjs = False, show_link = False, link_text = "", config = {"displayModeBar": False, "showTips": False})
+    with open(f'{plotly_save_path}/CostResourceAnalysis_Graph{option_idx+1}2.txt', 'w') as save_file:
+        save_file.write(div2)
+    div3 = pyo.plot(fig3, output_type = 'div', include_plotlyjs = False, show_link = False, link_text = "", config = {"displayModeBar": False, "showTips": False})
+    with open(f'{plotly_save_path}/CostResourceAnalysis_Graph{option_idx+1}3.txt', 'w') as save_file:
+        save_file.write(div3)
 
 # # Testing
 # from CitySelection import CitySelection_Script

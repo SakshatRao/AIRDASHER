@@ -3,6 +3,8 @@ from .models import GENERAL_PARAMS_CLASS, ROUTE_PARAMS_CLASS, ROUTE_CLASS, OPTIO
 
 import ast
 from pathlib import Path
+import shutil
+import os
 
 from AnalysisScripts.CitySelection import CitySelection_Script, Airport
 from AnalysisScripts.RouteSelection import RouteSelection_Script
@@ -38,12 +40,14 @@ def CitySelection(request):
 
             global tier_1_2_cities
             THIS_FOLDER = Path(__file__).parent.resolve()
+            shutil.rmtree(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CitySelection/', ignore_errors = True)
+            os.mkdir(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CitySelection/')
             preprocessor = PreProcessor(tier_1_2_cities, f'{THIS_FOLDER}/../AnalysisScripts/PreProcessed_Datasets')
             cities, airports = CitySelection_Script(
                 general_params.__dict__,
                 preprocessor, tier_1_2_cities,
                 f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs',
-                f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs/PlotlyGraphs'
+                f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CitySelection'
             )
             
 
@@ -104,8 +108,8 @@ def CitySelection(request):
     THIS_FOLDER = Path(__file__).parent.resolve()
     for city in cities:
         try:
-            div1 = open(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs/PlotlyGraphs/{city.NAME}_CitySelection_Graph1.txt', 'r').read()
-            div2 = open(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs/PlotlyGraphs/{city.NAME}_CitySelection_Graph2.txt', 'r').read()
+            div1 = open(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CitySelection/{city.NAME}_CitySelection_Graph1.txt', 'r').read()
+            div2 = open(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CitySelection/{city.NAME}_CitySelection_Graph2.txt', 'r').read()
             divs1.append(div1)
             divs2.append(div2)
         except:
@@ -161,13 +165,15 @@ def RouteSelection(request):
             general_params = GENERAL_PARAMS_CLASS.objects.all()[0]
             global tier_1_2_cities
             THIS_FOLDER = Path(__file__).parent.resolve()
+            shutil.rmtree(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/RouteSelection/', ignore_errors = True)
+            os.mkdir(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/RouteSelection/')
             preprocessor = PreProcessor(tier_1_2_cities, f'{THIS_FOLDER}/../AnalysisScripts/PreProcessed_Datasets')
             routes = RouteSelection_Script(
                 selected_city_name, AIRPORT_dict,
                 general_params.__dict__,
                 preprocessor, tier_1_2_cities,
                 f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs',
-                f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs/PlotlyGraphs'
+                f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/RouteSelection'
             )
             
             ROUTE_CLASS.objects.all().delete()
@@ -212,7 +218,7 @@ def RouteSelection(request):
     THIS_FOLDER = Path(__file__).parent.resolve()
     for route in routes:
         try:
-            div = open(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs/PlotlyGraphs/{route.CITY.NAME}-{route.AIRPORT.AIRPORT_NAME}_RouteSelection_Graph1.txt', 'r').read()
+            div = open(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/RouteSelection/{route.CITY.NAME}-{route.AIRPORT.AIRPORT_NAME}_RouteSelection_Graph1.txt', 'r').read()
             divs.append(div)
         except:
             print("PROBLEM SEEN WITH PLOTLY GRAPHS!")
@@ -418,13 +424,15 @@ def CostResourceAnalysis(request):
             
             global tier_1_2_cities
             THIS_FOLDER = Path(__file__).parent.resolve()
+            shutil.rmtree(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CostResourceAnalysis/', ignore_errors = True)
+            os.mkdir(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CostResourceAnalysis/')
             preprocessor = PreProcessor(tier_1_2_cities, f'{THIS_FOLDER}/../AnalysisScripts/PreProcessed_Datasets')
             options = CostResourceAnalysis_Script(
                 selected_route_info,
                 general_params.__dict__, route_params.__dict__,
                 preprocessor,
                 f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs',
-                f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs'
+                f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CostResourceAnalysis'
             )
             print(options)
 
@@ -439,12 +447,12 @@ def CostResourceAnalysis(request):
                     NUM_PLANES = str(option['num_planes']),
                     ROUTE = selected_route,
                     DEMAND = option['cost_resource_analysis']['total_demands'],
-                    CAPACITY = option['cost_resource_analysis']['total_capacities'],
-                    EXPENSES = option['cost_resource_analysis']['EXPENSES'],
-                    EARNINGS = option['cost_resource_analysis']['EARNINGS'],
-                    PROFIT_MARGIN = option['cost_resource_analysis']['PROFIT_MARGIN_LIST'],
+                    CAPACITY = round(option['cost_resource_analysis']['total_capacities'], 2),
+                    EXPENSES = round(option['cost_resource_analysis']['EXPENSES'], 2),
+                    EARNINGS = round(option['cost_resource_analysis']['EARNINGS'], 2),
+                    PROFIT_MARGIN = round(option['cost_resource_analysis']['PROFIT_MARGIN_LIST'], 2),
                     PROFITABILITY_YEAR = str(option['cost_resource_analysis']['profitability_year']),
-                    OCCUPANCY_RATE = option['cost_resource_analysis']['total_flight_vacancies'],
+                    OCCUPANCY_RATE = round(option['cost_resource_analysis']['total_flight_vacancies'], 2),
                     RANK = option_idx + 1
                 )
                 option_object.save()
@@ -453,6 +461,7 @@ def CostResourceAnalysis(request):
         return redirect('RouteDev:CitySelection')         
 
     general_params = GENERAL_PARAMS_CLASS.objects.all()[0]
+    route_params = ROUTE_PARAMS_CLASS.objects.all()[0]
     options = OPTION_CLASS.objects.all()
     options_total_planes_info = [ast.literal_eval(x.NUM_PLANES)[-1] for x in options]
     options_feasibility = ['feasible' if (x.FEASIBILITY == True) else 'non_feasible' for x in options]
@@ -477,12 +486,28 @@ def CostResourceAnalysis(request):
         'min_price_out': selected_route_price_out_min,
         'max_price_out': selected_route_price_out_max
     }
+
+    divs1 = []
+    divs2 = []
+    divs3 = []
+    THIS_FOLDER = Path(__file__).parent.resolve()
+    for option_idx, _ in enumerate(options):
+        try:
+            div1 = open(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CostResourceAnalysis/CostResourceAnalysis_Graph{option_idx + 1}1.txt', 'r').read()
+            div2 = open(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CostResourceAnalysis/CostResourceAnalysis_Graph{option_idx + 1}2.txt', 'r').read()
+            div3 = open(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CostResourceAnalysis/CostResourceAnalysis_Graph{option_idx + 1}3.txt', 'r').read()
+            divs1.append(div1)
+            divs2.append(div2)
+            divs3.append(div3)
+        except:
+            print("PROBLEM SEEN WITH PLOTLY GRAPHS!")
+            pass
     
     context = {
         'general_param_info': general_params,
         'route_param_info': route_params,
         'selected_route_info': selected_route,
-        'options_info': zip(options, options_total_planes_info, options_plane_addition_info, options_feasibility),
+        'options_info': zip(options, options_total_planes_info, options_plane_addition_info, options_feasibility, divs1, divs2, divs3),
         **other_param_options
     }
     return render(request, 'RouteDev/CostResourceAnalysis.html', context)

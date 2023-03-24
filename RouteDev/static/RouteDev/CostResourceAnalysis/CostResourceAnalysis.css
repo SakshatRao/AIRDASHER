@@ -1,9 +1,79 @@
-.feasible {
-    background-color: green;
+html {
+    min-height: 100vh;
 }
 
-.non_feasible {
-    background-color: red;
+body {
+    background-color: var(--light3);
+    color: var(--black);
+    margin: 0px 0px;
+    min-height: 100vh;
+}
+
+#all-window {
+    margin: 0% 0%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.options-pane {
+    background-color: var(--light2);
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100%;
+}
+
+.options-pane>h1 {
+    margin: 10% 0 5% 0;
+    font-size: 3em;
+    text-align: center;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    text-align: center;
+    width: 90%;
+}
+
+.options>h1 {
+    font-size: 3em;
+}
+
+.option {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    margin: 2% 0;
+}
+
+.feasible-option {
+    background-color: var(--light_green);
+    border: 3px solid var(--green);
+}
+
+.non_feasible-option {
+    background-color: var(--light_red);
+    border: 3px solid var(--red);
+}
+
+.feasible-option:hover {
+    background-color: var(--green);
+    border-color: var(--black);
+    cursor: pointer;
+}
+
+.non_feasible-option:hover {
+    background-color: var(--red);
+    border-color: var(--black);
+    cursor: pointer;
 }
 
 .OptionModal {
@@ -14,24 +84,193 @@
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: auto;
 }
 
 .modal-content-outer {
-    width: 95%;
+    width: 90%;
     margin: 2% auto;
-    background-color: green;
+    padding: 0 0 2% 0;
+    background-color: var(--dark1);
+    border: 3px solid var(--dark3);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.close_button {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    margin: 0.5% 1% 0 0;
+    cursor: pointer;
+}
+
+.close {
+    color: var(--dark3);
+    font-weight: bold;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%;
+}
+
+.modal-content-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 20%;
+}
+
+.modal-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.modal-title>h1 {
+    font-size: 3em;
+    margin: 0 0 3% 0;
+}
+
+.modal-title-box {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-title-box img {
+    width: 10%;
+    margin: 0 5% 0 0;
+}
+
+.modal-title-box h2 {
+    color: var(--white);
+}
+
+.feasible-box {
+    background-color: var(--green);
+}
+
+.feasible-box>img:nth-child(2), .feasible-box>h2:nth-child(4) {
+    display: none;
+}
+
+.non_feasible-box {
+    background-color: var(--red);
+}
+
+.non_feasible-box>img:first-child, .non_feasible-box>h2:nth-child(3) {
+    display: none;
+}
+
+.num-planes-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.num-planes-info>h3 {
+    font-size: 2em;
+    margin: 15% 0 10% 0;
+}
+
+.num-planes-list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.num-planes-list h3 {
+    font-size: 1.25em;
+    margin: 0;
+}
+
+.num-planes-list h4 {
+    margin: 0 0 10% 0;
+}
+
+.modal-graph {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+form {
+    width: 60%;
+    min-height: 100vh;
+    background-color: var(--light1);
+    border-left: 3px solid var(--dark1);
+}
+
+.params-pane {
+    margin: 0% 5%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.price-params {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    border: 2px solid var(--black);
+    margin: 3%;
+    padding: 2%;
+}
+
+.price-params-title h2 {
+    margin: 0 0 10% 0;
+    font-size: 2em;
+}
+
+.price-params-panes {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: stretch;
+    width: 100%;
+}
+
+.price-params-panes-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 40%;
+}
+
+.price-params-panes-content h3 {
+    margin: 0 0 1% 0;
+}
+
+.price-params-panes-content p {
+    text-align: center;
+    margin: 0;
+    font-size: 0.8em;
+    font-style: italic;
 }
 
 .slidecontainer {
-    width: 30%;
+    width: 90%;
 }
 
 .slider {
     -webkit-appearance: none;
     width: 100%;
     height: 25px;
-    background: #d3d3d3;
+    background: var(--light_blue);
     outline: none;
     opacity: 0.7;
     -webkit-transition: .2s;
@@ -47,13 +286,183 @@
     appearance: none;
     width: 25px;
     height: 25px;
-    background: #04AA6D;
+    background: var(--blue);
     cursor: pointer;
 }
 
 .slider::-moz-range-thumb {
     width: 25px;
     height: 25px;
-    background: #04AA6D;
+    background: var(--blue);
     cursor: pointer;
 }
+
+.cost-fleet-panes {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch;
+    width: 100%;
+}
+
+.cost-pane {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    width: 45%;
+    border: 2px solid var(--black);
+    padding: 0 2%;
+}
+
+.cost-pane h2 {
+    width: 100%;
+    text-align: center;
+    font-size: 2em;
+}
+
+.cost-pane h4 {
+    margin: 0;
+    font-size: 1.25em;
+    font-weight: normal;
+}
+
+.currencyinput {
+    border: 1px inset #ccc;
+    background-color: var(--white);
+    margin: 0 0 5% 0;
+}
+
+.currencyinput input {
+    border: 0;
+    background-color: var(--white);
+    font-size: 1.25em;
+}
+
+.cost-pane h6 {
+    font-style: italic;
+    font-size: 0.9em;
+    font-weight: lighter;
+    margin: 0 0 1% 0;
+}
+
+.fleet-pane {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    width: 45%;
+    border: 2px solid var(--black);
+    padding: 0 2%;
+}
+
+.fleet-pane h2 {
+    font-size: 2em;
+    margin: 0;
+}
+
+.fleet-subpanes {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch;
+}
+
+.fleet-subpane {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.fleet-subpane img {
+    width: 50%;
+    margin: 0 auto;
+}
+
+.fleet-subpane h3 {
+    font-weight: normal;
+    margin: 0;
+}
+
+.fleet-subpane h4 {
+    text-align: center;
+}
+
+.fleet-subpane input {
+    font-size: 1.25em;
+    width: 70%;
+    margin: 0 0 10% 0;
+}
+
+.other-param-pane {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch;
+    width: 100%;
+    margin: 3% 0;
+    padding: 0 2%;
+}
+
+.other-param-pane h3 {
+    margin: 0;
+}
+
+.other-param-pane input {
+    font-size: 1.25em;
+    background-color: var(--light3);
+}
+
+.submit-button {
+    text-decoration: none;
+    cursor: pointer;
+    background-color: var(--blue);
+    border: 2px solid var(--black);
+    margin: 1% 0 0 0;
+    width: 30%;
+}
+
+.submit-button input {
+    padding: 2%;
+    width: 100%;
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--black);
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+#back {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 5%;
+    z-index: 1000;
+}
+
+#back:hover {
+    width: 6%;
+}
+
+#back a img {
+    width: 100%;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
