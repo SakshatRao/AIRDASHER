@@ -15,6 +15,43 @@ tier_1_2_cities = [
     'Ahmedabad', 'Bengaluru', 'Mumbai', 'Pune', 'Chennai', 'Hyderabad', 'Kolkata', 'Delhi', 'Visakhapatnam', 'Guwahati', 'Patna',
     'Raipur', 'Gurugram', 'Shimla', 'Jamshedpur', 'Thiruvananthapuram', 'Bhopal', 'Bhubaneswar', 'Amritsar', 'Jaipur', 'Lucknow', 'Dehradun'
 ]
+tier_1_2_cities = tier_1_2_cities + (
+    "Guntur, Kakinada, Kurnool, Nellore, Rajamahendravaram, Vijayawada".split(', ')
+) + (
+    "Bilaspur, Bhilai".split(', ')
+) + (
+    "Anand, Bhavnagar, Dahod, Jamnagar, Rajkot, Surat, Vadodara".split(', ')
+) + (
+    "Faridabad, Karnal".split(', ')
+) + (
+    "Hamirpur".split(', ')
+) + (
+    "Bokaro Steel City, Dhanbad, Ranchi".split(', ')
+) + (
+    "Belagavi, Hubballi-Dharwad, Kalaburagi, Mangaluru, Mysuru, Vijayapura".split(', ')
+) + (
+    "Kannur, Kochi, Kollam, Kozhikode, Malappuram, Thrissur".split(', ')
+) + (
+    "Gwalior, Indore, Jabalpur, Ratlam, Ujjain".split(', ')
+) + (
+    "Amravati, Aurangabad, Bhiwandi, Dombivli, Jalgaon, Kolhapur, Nagpur, Nanded, Nashik, Sangli, Solapur, Vasai-Virar".split(', ')
+) + (
+    "Cuttack, Rourkela".split(', ')
+) + (
+    "Jalandhar, Ludhiana".split(', ')
+) + (
+    "Ajmer, Bikaner, Jodhpur".split(', ')
+) + (
+    "Coimbatore, Erode, Madurai, Salem, Thanjavur, Tiruchirappalli, Tirunelveli, Tiruvannamalai, Vellore".split(', ')
+) + (
+    "Warangal".split(', ')
+) + (
+    "Agra, Aligarh, Bareilly, Ghaziabad, Gorakhpur, Jhansi, Kanpur, Mathura, Meerut, Moradabad, Noida, Prayagraj, Varanasi".split(', ')
+) + (
+    "Asansol, Berhampore, Burdwan, Durgapur, Purulia, Siliguri".split(', ')
+) + (
+    "Chandigarh, Jammu, Puducherry, Srinagar".split(', ')
+)
 
 def RouteDevHome(request):
 
@@ -24,16 +61,23 @@ def CitySelection(request):
 
     if(request.method == 'POST'):
 
-        general_params = GENERAL_PARAMS_CLASS.objects.all()[0]
-
         NEW_FORECAST_YEAR = int(request.POST['NEW_FORECAST_YEAR'])
         NEW_SAMPLE_NAME = request.POST['NEW_SAMPLE_NAME']
+        NEW_ONLY_HUBS = request.POST['NEW_ONLY_HUBS']
+
+        general_params = GENERAL_PARAMS_CLASS.objects.all()[0]
+        if(NEW_ONLY_HUBS == 'True'):
+            general_params.ONLY_HUBS = True
+        else:
+            general_params.ONLY_HUBS = False
+        general_params.save()
         
         forecast_year_unchanged = (NEW_FORECAST_YEAR == general_params.FORECAST_YEAR)
         sample_unchanged = (NEW_SAMPLE_NAME == general_params.SAMPLE_NAME)
         nothing_changed = forecast_year_unchanged & sample_unchanged
         if(nothing_changed == False):
             
+            general_params = GENERAL_PARAMS_CLASS.objects.all()[0]
             general_params.FORECAST_YEAR = NEW_FORECAST_YEAR
             general_params.SAMPLE_NAME = NEW_SAMPLE_NAME
             general_params.save()
@@ -49,7 +93,6 @@ def CitySelection(request):
                 f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs',
                 f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CitySelection'
             )
-            
 
             CITY_CLASS.objects.all().delete()
             for city in cities:
@@ -115,6 +158,8 @@ def CitySelection(request):
         except:
             print("PROBLEM SEEN WITH PLOTLY GRAPHS!")
             pass
+    
+    print(general_params.ONLY_HUBS)
     context = {
         'general_params_info': general_params,
         'cities_info': cities,
@@ -208,7 +253,9 @@ def RouteSelection(request):
     general_params = GENERAL_PARAMS_CLASS.objects.all()[0]
     selected_city = CITY_CLASS.objects.filter(SELECTED = True)[0]
     routes = ROUTE_CLASS.objects.all()
-    airports = AIRPORT_CLASS.objects.filter(IS_HUB = True)
+    airports = []
+    for route in routes:
+        airports.append(route.AIRPORT)
     def sort_airports_based_on_routes(airports, routes):
         in_routes = [x.AIRPORT for x in routes]
         not_in_routes = [x for x in airports if x not in in_routes]
@@ -293,6 +340,7 @@ def CostResourceAnalysis(request):
             request_POST['NEW_OTHER_COST'] = int(request.POST['NEW_OTHER_COST'])
             request_POST['NEW_MIN_PROFIT_MARGIN'] = float(request.POST['NEW_MIN_PROFIT_MARGIN'])
             request_POST['NEW_ANALYSIS_POINTS'] = str(request.POST['NEW_ANALYSIS_POINTS'])
+            request_POST['NEW_DEMAND_FULFILMENT_RATE'] = float(request.POST['NEW_DEMAND_FULFILMENT_RATE'])
 
             if(
                 (general_params.CAPACITY_NARROWBODY != request_POST['NEW_CAPACITY_NARROWBODY']) or
@@ -304,24 +352,25 @@ def CostResourceAnalysis(request):
                 (general_params.OPERATING_COST != request_POST['NEW_OPERATING_COST']) or
                 (general_params.OTHER_COST != request_POST['NEW_OTHER_COST']) or
                 (general_params.MIN_PROFIT_MARGIN != request_POST['NEW_MIN_PROFIT_MARGIN']) or
-                (general_params.ANALYSIS_POINTS != request_POST['NEW_ANALYSIS_POINTS'])
+                (general_params.ANALYSIS_POINTS != request_POST['NEW_ANALYSIS_POINTS']) or
+                (general_params.DEMAND_FULFILMENT_RATE != request_POST['NEW_DEMAND_FULFILMENT_RATE'])
             ):
                 params_changed = True
-                print("Entered 1")
-                print(type(general_params.CAPACITY_NARROWBODY))
-                print(type(request.POST['NEW_CAPACITY_NARROWBODY']))
-                print(
-                    (general_params.CAPACITY_NARROWBODY != request_POST['NEW_CAPACITY_NARROWBODY']),
-                    (general_params.CAPACITY_TURBOPROP != request_POST['NEW_CAPACITY_TURBOPROP']) ,
-                    (general_params.FLEET_NARROWBODY != request_POST['NEW_FLEET_NARROWBODY']),
-                    (general_params.FLEET_TURBOPROP != request_POST['NEW_FLEET_TURBOPROP']),
-                    (general_params.INFLATION_RATE != request_POST['NEW_INFLATION_RATE']),
-                    (general_params.FIXED_COST != request_POST['NEW_FIXED_COST']),
-                    (general_params.OPERATING_COST != request_POST['NEW_OPERATING_COST']),
-                    (general_params.OTHER_COST != request_POST['NEW_OTHER_COST']),
-                    (general_params.MIN_PROFIT_MARGIN != request_POST['NEW_MIN_PROFIT_MARGIN']),
-                    (general_params.ANALYSIS_POINTS != request_POST['NEW_ANALYSIS_POINTS'])
-                )
+                # print("Entered 1")
+                # print(type(general_params.CAPACITY_NARROWBODY))
+                # print(type(request.POST['NEW_CAPACITY_NARROWBODY']))
+                # print(
+                #     (general_params.CAPACITY_NARROWBODY != request_POST['NEW_CAPACITY_NARROWBODY']),
+                #     (general_params.CAPACITY_TURBOPROP != request_POST['NEW_CAPACITY_TURBOPROP']) ,
+                #     (general_params.FLEET_NARROWBODY != request_POST['NEW_FLEET_NARROWBODY']),
+                #     (general_params.FLEET_TURBOPROP != request_POST['NEW_FLEET_TURBOPROP']),
+                #     (general_params.INFLATION_RATE != request_POST['NEW_INFLATION_RATE']),
+                #     (general_params.FIXED_COST != request_POST['NEW_FIXED_COST']),
+                #     (general_params.OPERATING_COST != request_POST['NEW_OPERATING_COST']),
+                #     (general_params.OTHER_COST != request_POST['NEW_OTHER_COST']),
+                #     (general_params.MIN_PROFIT_MARGIN != request_POST['NEW_MIN_PROFIT_MARGIN']),
+                #     (general_params.ANALYSIS_POINTS != request_POST['NEW_ANALYSIS_POINTS'])
+                # )
             
             general_params.CAPACITY_NARROWBODY = request_POST['NEW_CAPACITY_NARROWBODY']
             general_params.CAPACITY_TURBOPROP = request_POST['NEW_CAPACITY_TURBOPROP']
@@ -333,6 +382,7 @@ def CostResourceAnalysis(request):
             general_params.OTHER_COST = request_POST['NEW_OTHER_COST']
             general_params.MIN_PROFIT_MARGIN = request_POST['NEW_MIN_PROFIT_MARGIN']
             general_params.ANALYSIS_POINTS = request_POST['NEW_ANALYSIS_POINTS']
+            general_params.DEMAND_FULFILMENT_RATE = request_POST['NEW_DEMAND_FULFILMENT_RATE']
             general_params.save()
 
             route_params = ROUTE_PARAMS_CLASS.objects.all()[0]
@@ -345,11 +395,11 @@ def CostResourceAnalysis(request):
                 (route_params.PRICE_OUT != request_POST['NEW_PRICE_OUT'])
             ):
                 params_changed = True
-                print("Entered 2")
-                print(
-                    (route_params.PRICE_IN != request_POST['NEW_PRICE_IN']),
-                    (route_params.PRICE_OUT != request_POST['NEW_PRICE_OUT'])
-                )
+                # print("Entered 2")
+                # print(
+                #     (route_params.PRICE_IN != request_POST['NEW_PRICE_IN']),
+                #     (route_params.PRICE_OUT != request_POST['NEW_PRICE_OUT'])
+                # )
 
             route_params.PRICE_IN = request_POST['NEW_PRICE_IN']
             route_params.PRICE_OUT = request_POST['NEW_PRICE_OUT']
@@ -414,7 +464,7 @@ def CostResourceAnalysis(request):
             
             route_params = ROUTE_PARAMS_CLASS.objects.all()[0]
             if(params_changed == False):
-                print("Entered!")
+                # print("Entered!")
                 route_params = ROUTE_PARAMS_CLASS.objects.all()[0]
                 route_params.PRICE_IN = convert_market_price_to_int(selected_route.PRICE_IN_MARKET)
                 route_params.PRICE_OUT = convert_market_price_to_int(selected_route.PRICE_OUT_MARKET)
@@ -434,7 +484,7 @@ def CostResourceAnalysis(request):
                 f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs',
                 f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CostResourceAnalysis'
             )
-            print(options)
+            # print(options)
 
             selected_route.MARKET_SHARE_IN = options['OtherInfo']['MARKET_SHARE_IN']
             selected_route.MARKET_SHARE_OUT = options['OtherInfo']['MARKET_SHARE_OUT']

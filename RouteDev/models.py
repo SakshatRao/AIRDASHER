@@ -14,6 +14,8 @@ class GENERAL_PARAMS_CLASS(models.Model):
     MIN_PROFIT_MARGIN = models.FloatField(default = 0)
     ANALYSIS_POINTS = models.CharField(max_length = 200)
     SAMPLE_NAME = models.CharField(max_length = 20)
+    ONLY_HUBS = models.BooleanField(default = True)
+    DEMAND_FULFILMENT_RATE = models.FloatField(default = 100.0)
 
 class CITY_CLASS(models.Model):
     NAME = models.CharField(max_length = 30)

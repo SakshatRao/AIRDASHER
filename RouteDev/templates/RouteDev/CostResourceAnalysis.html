@@ -131,9 +131,13 @@
                             <h3>ANALYSIS POINTS:</h3>
                             <input type="text" name="NEW_ANALYSIS_POINTS" value="{{ general_param_info.ANALYSIS_POINTS }}" id="ANALYSIS_POINTS">
                         </div>
+                        <div class="demand-fulfilment-rate">
+                            <h3>DEMAND FULFILLMENT RATE:</h3>
+                            <input type="number" name="NEW_DEMAND_FULFILMENT_RATE" value="{{ general_param_info.DEMAND_FULFILMENT_RATE }}" min="0" max="100" id="DEMAND_FULFILMENT_RATE">
+                        </div>
                         <div class="inflation-rate">
                             <h3>INFLATION RATE:</h3>
-                            <input type="number" name="NEW_INFLATION_RATE" value="{{ general_param_info.INFLATION_RATE }}" id="INFLATION_RATE">
+                            <input type="number" name="NEW_INFLATION_RATE" value="{{ general_param_info.INFLATION_RATE }}" min="1" max="20" id="INFLATION_RATE">
                         </div>
                     </div>
                     <div class="submit-button">

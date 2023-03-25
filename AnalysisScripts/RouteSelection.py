@@ -18,6 +18,7 @@ def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor,
     PRESENT_YEAR = general_params['PRESENT_YEAR']
     FORECAST_YEAR = general_params['FORECAST_YEAR']
     SAMPLE_NAME = general_params['SAMPLE_NAME']
+    ONLY_HUBS = general_params['ONLY_HUBS']
 
     preprocessor.network_data = preprocessor.all_samples_network_data[SAMPLE_NAME]
 
@@ -189,8 +190,6 @@ def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor,
 
     model = LinearModel(preprocessor.RouteSelection_model_coefs)
 
-    uniq_hubs = preprocessor.network_data[preprocessor.network_data['FromHub'] == 1]['From'].unique()
-
     def get_route_demand_forecasts(SELECTED_CITY, SELECTED_HUB_AIRPORT):
         selected_hub_city = preprocessor.city_mapping[preprocessor.city_mapping['AirRouteData_AirportCode'] == SELECTED_HUB_AIRPORT].iloc[0]['City']
         connecting_airports = []
@@ -304,6 +303,13 @@ def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor,
     city = selected_city
     route_forecasted_demands_dict = {}
 
+    if(ONLY_HUBS == True):
+        uniq_hubs = preprocessor.network_data[preprocessor.network_data['FromHub'] == 1]['From'].unique()
+    else:
+        uniq_hubs = pd.concat([preprocessor.network_data['From'], preprocessor.network_data['To']]).unique()
+        uniq_hubs = [x for x in uniq_hubs if x in airport_to_city_mapping]
+        print(uniq_hubs)
+    
     for hub in uniq_hubs:
         SELECTED_CITY = city
         SELECTED_HUB_AIRPORT = hub
@@ -334,8 +340,8 @@ def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor,
             SELECTED_CITY, SELECTED_HUB_AIRPORT,
             durations_railway[0], durations_railway[1],
             durations_railway[2], durations_railway[3], durations_railway[4],
-            route_forecasted_demands.iloc[0]['AdjustedForecastedDemand_InTraffic'],
-            route_forecasted_demands.iloc[0]['AdjustedForecastedDemand_OutTraffic'],
+            route_forecasted_demands.iloc[1]['AdjustedForecastedDemand_InTraffic'],
+            route_forecasted_demands.iloc[1]['AdjustedForecastedDemand_OutTraffic'],
             route_forecasted_demands.iloc[route_forecasted_demands.shape[0] - 1]['AdjustedForecastedDemand_InTraffic'],
             route_forecasted_demands.iloc[route_forecasted_demands.shape[0] - 1]['AdjustedForecastedDemand_OutTraffic'],
             NUM_OUT_MARKET, NUM_IN_MARKET,
@@ -353,12 +359,18 @@ def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor,
         'PRICE_OUT_MARKET', 'PRICE_IN_MARKET',
         'DISTANCE'
     ])
-    route_info_df['GrowthIn'] = (route_info_df['ForecastYearInForecast'] - route_info_df['PresentYearInForecast']) / (route_info_df['PresentYearInForecast'] + 1e-12) * 100
-    route_info_df['GrowthOut'] = (route_info_df['ForecastYearOutForecast'] - route_info_df['PresentYearOutForecast']) / (route_info_df['PresentYearOutForecast'] + 1e-12) * 100
+    route_info_df['GrowthIn'] = (route_info_df['ForecastYearInForecast'] - route_info_df['PresentYearInForecast']) / (route_info_df['PresentYearInForecast'] + 1e-12) * 100 / (FORECAST_YEAR - PRESENT_YEAR)
+    route_info_df['GrowthOut'] = (route_info_df['ForecastYearOutForecast'] - route_info_df['PresentYearOutForecast']) / (route_info_df['PresentYearOutForecast'] + 1e-12) * 100 / (FORECAST_YEAR - PRESENT_YEAR)
     route_info_df['AvgGrowth'] = (route_info_df['GrowthIn'] + route_info_df['GrowthOut']) / 2.0
     route_info_df = route_info_df.sort_values('AvgGrowth', ascending = False)
     route_info_df['Route'] = route_info_df.apply(lambda x: x['City'] + '-' + x['Hub'], axis = 1)
-    route_info_df = route_info_df.set_index('Route').head(5)
+    
+    route_info_df = route_info_df.head(10)
+    route_info_df = route_info_df[route_info_df['AvgGrowth'] > 0].reset_index(drop = True)
+    random_idx = np.random.choice(np.arange(route_info_df.shape[0]), 5, replace = False, p = np.arange(route_info_df.shape[0], 0, -1) / sum(np.arange(route_info_df.shape[0], 0, -1)))
+    random_idx = list(sorted(random_idx))
+    route_info_df = route_info_df.loc[random_idx].reset_index(drop = True)
+    route_info_df = route_info_df.set_index('Route')
 
     route_forecasted_demands_dict = dict([(x, route_forecasted_demands_dict[x]) for x in route_forecasted_demands_dict if x in [*route_info_df.index]])
 

@@ -102,7 +102,12 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
                     city_economic_data['State'] = pd.Series([''] * city_economic_data.shape[0])
                     city_economic_data['District'] = pd.Series([''] * city_economic_data.shape[0])
                 else:
-                    city_economic_data = preprocessor.economic_data[preprocessor.economic_data['District'] == district]
+                    if(district == 'BILASPUR'):
+                        city_economic_data = preprocessor.economic_data[(preprocessor.economic_data['District'] == district) & (preprocessor.economic_data['State'] == 'Chattisgarh')]
+                    elif(district == 'AURANGABAD'):
+                        city_economic_data = preprocessor.economic_data[(preprocessor.economic_data['District'] == district) & (preprocessor.economic_data['State'] == 'Maharashtra')]
+                    else:
+                        city_economic_data = preprocessor.economic_data[preprocessor.economic_data['District'] == district]
                 city_economic_data = city_economic_data.sort_values("Year").reset_index(drop = True)
                 city_economic_data['Year'] = city_economic_data['Year'].apply(lambda x: int(x.split('-')[0]))
                 if(city_economic_data.iloc[city_economic_data.shape[0] - 1]['Year'] - city_economic_data.iloc[0]['Year'] != city_economic_data.shape[0] + 1):
@@ -115,7 +120,12 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
                             to_add_row = pd.DataFrame([to_add_row], columns = city_economic_data.columns)
                             city_economic_data = pd.concat([city_economic_data, to_add_row], axis = 0).reset_index(drop = True)
                 city_economic_data = city_economic_data.sort_values("Year").reset_index(drop = True)
-                assert(city_economic_data.iloc[city_economic_data.shape[0] - 1]['Year'] - city_economic_data.iloc[0]['Year'] == city_economic_data.shape[0] - 1)
+                try:
+                    assert(city_economic_data.iloc[city_economic_data.shape[0] - 1]['Year'] - city_economic_data.iloc[0]['Year'] == city_economic_data.shape[0] - 1)
+                except:
+                    print(city_economic_data)
+                    print(city)
+                    exit()
                 city_latest_gdp = city_economic_data.iloc[city_economic_data.shape[0] - 1]['GDP']
                 city_latest_year = int(city_economic_data.iloc[city_economic_data.shape[0] - 1]['Year'])
                 cities_latest_gdps.append(city_latest_gdp)
@@ -204,7 +214,12 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
             years = [1991, 2001, 2011]
             for year_idx, (district, year, state) in enumerate(districts_years):
                 if(state == ''):
-                    district_education_data = preprocessor.education_data[preprocessor.education_data['District'] == district]
+                    if(district == 'BILASPUR'):
+                        district_education_data = preprocessor.education_data[(preprocessor.education_data['District'] == district) & (preprocessor.education_data['State'] == 'CHHATTISGARH')]
+                    elif(district == 'AURANGABAD'):
+                        district_education_data = preprocessor.education_data[(preprocessor.education_data['District'] == district) & (preprocessor.education_data['State'] == 'MAHARASHTRA')]
+                    else:
+                        district_education_data = preprocessor.education_data[preprocessor.education_data['District'] == district]
                 else:
                     district_education_data = preprocessor.education_data[preprocessor.education_data['State'] == state]
                     district_education_data = district_education_data.groupby('Year')[district_education_data.columns[:-3]].aggregate('sum').reset_index(drop = False).rename({'index': 'Year'})
@@ -238,16 +253,20 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
                 for district in districts:
                     has_district = has_district | (preprocessor.pop_area_household_data['District'] == district)
                 district_data = preprocessor.pop_area_household_data[has_district]
-                district_data = district_data.drop(['IsDistrict', 'District', 'IsTotal'], axis = 1)
+                district_data = district_data.drop(['StateCode', 'IsDistrict', 'District', 'IsTotal'], axis = 1)
                 district_data = pd.DataFrame([district_data.sum(axis = 0)], columns = district_data.columns)
+                district_data['StateCode'] = pd.Series([''] * district_data.shape[0])
                 district_data['IsDistrict'] = pd.Series(['DISTRICT'] * district_data.shape[0])
                 district_data['District'] = pd.Series([''] * district_data.shape[0])
                 district_data['IsTotal'] = pd.Series(['Total'] * district_data.shape[0])
-                district_data = district_data[[*district_data.columns[-3:]] + [*district_data.columns[:-3]]]
+                district_data = district_data[[*district_data.columns[-4:]] + [*district_data.columns[:-4]]]
             else:
-                district_data = preprocessor.pop_area_household_data[preprocessor.pop_area_household_data['District'] == district]
+                if(district == 'Bilaspur'):
+                    district_data = preprocessor.pop_area_household_data[(preprocessor.pop_area_household_data['District'] == district) & (preprocessor.pop_area_household_data['StateCode'] == 22)]
+                else:
+                    district_data = preprocessor.pop_area_household_data[preprocessor.pop_area_household_data['District'] == district]
             assert(district_data.shape[0] == 1)
-            district_data = pd.DataFrame(district_data.values[:, 3:], columns = [x + '_population_latest' for x in district_data.columns[3:]])
+            district_data = pd.DataFrame(district_data.values[:, 4:], columns = [x + '_population_latest' for x in district_data.columns[4:]])
             district_data['City'] = pd.Series([city])
             pop_area_household_data = pd.concat([pop_area_household_data, district_data], axis = 0)
         pop_area_household_data = pop_area_household_data[[*pop_area_household_data.columns[-1:]] + [*pop_area_household_data.columns[:-1]]]
@@ -261,7 +280,9 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
         latest_population_data = pd.DataFrame()
         for city in cities:
             mapped_city = city_to_city_latest_population_data_mapping[city]
-            if(mapped_city.startswith('{')):
+            if(pd.isnull(mapped_city)):
+                city_data = pd.DataFrame.from_dict({'City': [city], 'pop2023': [np.nan]}, orient = 'columns')
+            elif(mapped_city.startswith('{')):
                 mapped_cities = mapped_city[1:-1].split(' + ')
                 has_city = pd.Series([False] * preprocessor.latest_population_data.shape[0])
                 for mapped_city in mapped_cities:
@@ -271,8 +292,6 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
                 city_data = pd.DataFrame([city_data.sum(axis = 0)], columns = city_data.columns)
                 city_data['City'] = pd.Series([''] * city_data.shape[0])
                 city_data = city_data[[*city_data.columns[-1:]] + [*city_data.columns[:-1]]]
-            elif(mapped_city == ''):
-                city_data = pd.DataFrame.from_dict({'City': [city], 'pop2023': [np.nan]})
             else:
                 city_data = preprocessor.latest_population_data[preprocessor.latest_population_data['city'] == mapped_city]
                 city_data = city_data.drop(['latitude', 'longitude'], axis = 1)
@@ -364,48 +383,6 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
         categories_cols.extend([f"{category}_pca{n}" for n in range(1, N_COMPONENTS + 1)])
     
     cols_standardization_vals = preprocessor.CitySelection_cols_standardization_vals
-    
-    # # Trimming data for model training - Removing cities having no target variable
-    # # Standardizing data
-    # total_valid_data = total_dataset.copy()
-    # for col_idx, col in enumerate(total_valid_data.columns):
-    #     if((col in target_feature) or (col in latest_features)):
-    #         if(col in target_feature):
-    #             to_drop_idx = pd.isnull(total_valid_data[col])
-    #             to_drop_idx = to_drop_idx[to_drop_idx == True].index
-    #             total_valid_data = total_valid_data.drop(to_drop_idx, axis = 0)
-    #         elif(col in latest_features):
-    #             col_mean = np.nanmean(total_valid_data[col].values)
-    #             total_valid_data[col] = total_valid_data[col].fillna(col_mean)
-    #         col_mean = cols_standardization_vals[col]['mean']
-    #         col_std = cols_standardization_vals[col]['std']
-    #         total_valid_data[col] = (total_valid_data[col] - col_mean) / (col_std + 1e-20)
-    #         cols_standardization_vals[col] = {'mean': col_mean, 'std': col_std}
-
-    # data_X = total_valid_data[latest_features].values
-    # data_y = total_valid_data[target_feature].values[:, 0]
-
-    # # Applying PCA to reduce number of features
-    # # Required since we are training with very little data, having more features resulted in overfitting
-    # category_used_cols = []
-    # data_pca_X = np.zeros((data_X.shape[0], len(categories) * N_COMPONENTS))
-    # for category_idx, category in enumerate(categories):
-    #     to_use_cols = [x for x in range(data_X.shape[1]) if latest_features[x].endswith(f"_{category}_latest")]
-    #     category_data = data_X[:, to_use_cols]
-    #     if(category_data.shape[1] <= N_COMPONENTS):
-    #         data_pca_X[:, category_idx * N_COMPONENTS: category_idx * N_COMPONENTS + category_data.shape[1]] = category_data
-    #     else:
-    #         pca = preprocessor.CitySelection_pca[category_idx]
-    #         category_pca_data = np.dot(pca, category_data.transpose()).transpose()
-    #         data_pca_X[:, category_idx * N_COMPONENTS: (category_idx + 1) * N_COMPONENTS] = category_pca_data
-    #     category_used_cols.append(to_use_cols)
-
-    # data_pca_X_df = pd.DataFrame(data_pca_X, columns = categories_cols)
-    # data_pca_X_df['City'] = pd.Series(total_valid_data['City'].values)
-
-    # shutil.rmtree(f"{output_save_path}/Present_Features/", ignore_errors = True)
-    # os.mkdir(f"{output_save_path}/Present_Features/")
-    # data_pca_X_df.to_csv(f'{output_save_path}/Present_Features/data_pca_X.csv', index = None)
 
     class LinearModel:
         def __init__(self, coefs):
@@ -432,6 +409,15 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
                     non_na_idx = (pd.isnull(y) == False)
                     x = x[non_na_idx]
                     y = y[non_na_idx]
+                    def remove_outliers(y_raw):
+                        y = np.cumsum(y_raw, dtype=float) / np.arange(1, len(y_raw) + 1)
+                        q1 = np.quantile(y, 0.25)
+                        q3 = np.quantile(y, 0.75)
+                        iqr = q3 - q1
+                        return [x for x in range(len(y)) if ((y[x] >= (q1 - 1.5 * iqr)) & (y[x] <= (q3 + 1.5 * iqr)))]
+                    non_outlier_idx = remove_outliers(y)
+                    x = x[non_outlier_idx]
+                    y = y[non_outlier_idx]
                     if(len(x) > 1):
                         y = np.log(y)
                         curve_fit = np.polyfit(x, y, 1)
@@ -570,12 +556,12 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
         if(pd.isnull(row['In_Out_Traffic_target'])):
             return row['PredictedFutureTraffic']
         else:
-            return row['In_Out_Traffic_target']
+            return (row['In_Out_Traffic_target'] + 3 * row['PredictedFutureTraffic']) / 4
     airport_current_traffic_df['CurrentTraffic'] = airport_current_traffic_df.apply(get_current_traffic, axis = 1)
     airport_current_traffic_df = airport_current_traffic_df[['City', 'CurrentTraffic']]
 
     all_traffic_df = pd.merge(airport_current_traffic_df, forecasted_traffic_df, on = 'City')
-    all_traffic_df['GrowthRate'] = (all_traffic_df['PredictedFutureTraffic'] - all_traffic_df['CurrentTraffic']) / all_traffic_df['CurrentTraffic'] * 100
+    all_traffic_df['GrowthRate'] = (all_traffic_df['PredictedFutureTraffic'] - all_traffic_df['CurrentTraffic']) / all_traffic_df['CurrentTraffic'] * 100 / (FORECAST_YEAR - PRESENT_YEAR)
 
     most_growth_cities = all_traffic_df.sort_values("GrowthRate", ascending = False)
     most_growth_cities['Airport'] = most_growth_cities['City'].map(dict(zip(preprocessor.city_mapping['City'].values, preprocessor.city_mapping['AirRouteData_AirportCode'].values)))
@@ -649,7 +635,13 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
     airport_to_city_mapping = dict(zip(preprocessor.city_mapping['AirRouteData_AirportCode'].values, preprocessor.city_mapping['City'].values))
     most_growth_cities = most_growth_cities[~most_growth_cities['City'].isin([airport_to_city_mapping[x] for x in AIRPORTS])]
 
-    most_growth_cities_names = most_growth_cities['City'].values[:5]
+    most_growth_cities = most_growth_cities.head(20)
+    most_growth_cities = most_growth_cities[most_growth_cities['GrowthRate'] > 0].reset_index(drop = True)
+    random_idx = np.random.choice(np.arange(most_growth_cities.shape[0]), 5, replace = False, p = np.arange(most_growth_cities.shape[0], 0, -1) / sum(np.arange(most_growth_cities.shape[0], 0, -1)))
+    random_idx = list(sorted(random_idx))
+    most_growth_cities = most_growth_cities.loc[random_idx].reset_index(drop = True)
+    
+    most_growth_cities_names = most_growth_cities['City'].values
     plot_info_keys = [[x for x in plot_info if x.startswith(y)] for y in most_growth_cities_names]
     plot_info_all_keys = []
     for x in plot_info_keys:
@@ -657,7 +649,7 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
     sel_pred_traffic = all_pred_traffic[all_pred_traffic['City'].isin(most_growth_cities_names)]
     plotly_CitySelection(most_growth_cities_names, [(x, plot_info[x]) for x in plot_info_all_keys], sel_pred_traffic, plotly_save_path)
     
-    return OrderedDict(most_growth_cities.set_index('City').head(5).to_dict(orient = 'index')), AIRPORTS
+    return OrderedDict(most_growth_cities.set_index('City').to_dict(orient = 'index')), AIRPORTS
 
 def plotly_CitySelection(cities, plot_info, pred_traffic, plotly_save_path):
     

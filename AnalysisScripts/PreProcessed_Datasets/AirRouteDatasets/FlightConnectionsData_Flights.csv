@@ -405,6 +405,142 @@ DED,BLR,1173,170,110,Narrow Body,2.0
 DED,HYD,895,140,189,Narrow Body,1.0
 DED,LKO,288,60,46,Narrow Body,1.0
 DED,CCU,820,120,81,Narrow Body,1.0
+VGA,DEL,863,140,90,Narrow Body,2.0
+JGA,BOM,297,90,69,Narrow Body,1.0
+RAJ,BLR,776,100,96,Narrow Body,1.0
+RAJ,BOM,260,75,60,Narrow Body,3.0
+RAJ,DEL,584,115,70,Narrow Body,1.0
+STV,GOI,402,80,106,Narrow Body,1.0
+STV,BLR,637,125,51,Narrow Body,2.0
+STV,MAA,745,135,63,Narrow Body,1.0
+STV,HYD,457,90,59,Narrow Body,1.0
+STV,CCU,1011,150,78,Narrow Body,1.0
+STV,DEL,582,100,60,Narrow Body,4.0
+STV,JAI,439,85,50,Narrow Body,1.0
+BDQ,BOM,225,65,57,Narrow Body,2.0
+BDQ,BLR,696,115,81,Narrow Body,1.0
+BDQ,HYD,488,95,84,Narrow Body,1.0
+BDQ,DEL,493,85,71,Narrow Body,4.0
+IXR,MAA,788,125,54,Narrow Body,1.0
+IXR,BLR,858,135,58,Narrow Body,6.0
+IXR,HYD,612,110,80,Narrow Body,1.0
+IXR,GOX,910,145,53,Narrow Body,1.0
+IXR,PNQ,804,160,72,Narrow Body,1.0
+IXR,BOM,852,155,79,Narrow Body,4.0
+IXR,DEL,625,115,52,Narrow Body,11.0
+IXR,PAT,157,80,29,Narrow Body,1.0
+HBX,DEL,920,150,80,Narrow Body,1.0
+IXE,BOM,443,105,81,Narrow Body,4.0
+IXE,PNQ,393,80,50,Narrow Body,1.0
+IXE,DEL,1087,180,93,Narrow Body,1.0
+IXE,BLR,190,60,40,Narrow Body,4.0
+CNN,BOM,526,115,54,Narrow Body,2.0
+COK,GOX,421,85,61,Narrow Body,1.0
+COK,BLR,228,60,35,Narrow Body,16.0
+COK,MAA,322,70,32,Narrow Body,5.0
+COK,HYD,507,90,42,Narrow Body,6.0
+COK,PNQ,605,110,74,Narrow Body,1.0
+COK,BOM,660,130,74,Narrow Body,10.0
+COK,AMD,926,145,76,Narrow Body,1.0
+COK,CCU,1174,170,105,Narrow Body,1.0
+COK,DEL,1272,195,99,Narrow Body,8.0
+CCJ,BLR,185,60,36,Narrow Body,1.0
+CCJ,BOM,586,115,61,Narrow Body,2.0
+CCJ,DEL,1205,190,59,Narrow Body,1.0
+GWL,DEL,171,60,28,Narrow Body,1.0
+GWL,BOM,603,120,52,Narrow Body,1.0
+IDR,MAA,730,120,87,Narrow Body,1.0
+IDR,BLR,669,120,75,Narrow Body,3.0
+IDR,GOI,522,110,140,Narrow Body,1.0
+IDR,HYD,415,70,47,Narrow Body,2.0
+IDR,PNQ,310,70,96,Narrow Body,1.0
+IDR,BOM,314,100,47,Narrow Body,5.0
+IDR,RPR,394,75,50,Narrow Body,1.0
+IDR,CCU,805,125,100,Narrow Body,1.0
+IDR,DEL,411,85,59,Narrow Body,7.0
+IDR,IXJ,690,105,153,Narrow Body,1.0
+JLR,DEL,414,90,87,Narrow Body,1.0
+IXU,BOM,173,60,43,Narrow Body,2.0
+IXU,DEL,610,115,87,Narrow Body,2.0
+NAG,MAA,564,110,41,Narrow Body,1.0
+NAG,BLR,552,100,50,Narrow Body,3.0
+NAG,GOX,502,80,47,Narrow Body,3.0
+NAG,PNQ,375,80,44,Narrow Body,7.0
+NAG,BOM,423,100,47,Narrow Body,10.0
+NAG,CCU,611,100,180,Narrow Body,1.0
+NAG,DEL,530,100,67,Narrow Body,6.0
+ISK,DEL,629,135,67,Narrow Body,3.0
+JDH,BOM,494,105,71,Narrow Body,2.0
+JDH,BLR,950,160,93,Narrow Body,1.0
+JDH,MAA,1025,145,102,Narrow Body,1.0
+JDH,HYD,711,125,58,Narrow Body,1.0
+JDH,DEL,295,75,43,Narrow Body,2.0
+CJB,GOX,388,80,45,Narrow Body,1.0
+CJB,BOM,622,115,68,Narrow Body,4.0
+CJB,PNQ,561,110,198,Narrow Body,1.0
+CJB,DEL,1211,185,93,Narrow Body,3.0
+CJB,HYD,438,85,58,Narrow Body,4.0
+CJB,BLR,156,60,45,Narrow Body,3.0
+CJB,MAA,251,65,51,Narrow Body,8.0
+IXM,BOM,728,125,86,Narrow Body,3.0
+IXM,DEL,1295,185,136,Narrow Body,1.0
+IXM,HYD,511,80,70,Narrow Body,1.0
+IXM,MAA,259,60,48,Narrow Body,1.0
+TRZ,HYD,446,95,46,Narrow Body,1.0
+AGR,BLR,964,145,106,Narrow Body,1.0
+GOP,DEL,408,85,66,Narrow Body,4.0
+GOP,BOM,855,130,84,Narrow Body,3.0
+GOP,HYD,730,130,115,Narrow Body,1.0
+KNU,BOM,696,130,60,Narrow Body,3.0
+KNU,BLR,930,135,67,Narrow Body,1.0
+IXD,BLR,884,155,119,Narrow Body,1.0
+IXD,BOM,716,145,72,Narrow Body,1.0
+IXD,DEL,357,90,63,Narrow Body,1.0
+VNS,CCU,401,75,96,Narrow Body,1.0
+VNS,MAA,877,140,161,Narrow Body,1.0
+VNS,BLR,910,145,100,Narrow Body,5.0
+VNS,HYD,635,130,146,Narrow Body,2.0
+VNS,PNQ,742,130,58,Narrow Body,1.0
+VNS,BOM,774,145,66,Narrow Body,8.0
+VNS,AMD,664,105,74,Narrow Body,3.0
+VNS,DEL,414,105,62,Narrow Body,7.0
+RDP,MAA,867,130,71,Narrow Body,2.0
+RDP,BLR,952,145,167,Narrow Body,1.0
+RDP,HYD,720,120,92,Narrow Body,1.0
+RDP,BOM,975,160,72,Narrow Body,2.0
+RDP,DEL,715,120,80,Narrow Body,1.0
+IXB,DIB,414,75,44,Narrow Body,1.0
+IXB,GAU,205,55,35,Narrow Body,3.0
+IXB,CCU,278,70,94,Narrow Body,6.0
+IXB,MAA,1082,170,183,Narrow Body,1.0
+IXB,BLR,1157,170,114,Narrow Body,5.0
+IXB,HYD,909,145,165,Narrow Body,2.0
+IXB,BOM,1113,175,220,Narrow Body,3.0
+IXB,AMD,1013,165,146,Narrow Body,2.0
+IXB,DEL,698,140,113,Narrow Body,12.0
+IXC,SXR,257,60,66,Narrow Body,4.0
+IXC,PAT,615,110,59,Narrow Body,1.0
+IXC,CCU,906,140,117,Narrow Body,1.0
+IXC,LKO,366,75,46,Narrow Body,1.0
+IXC,MAA,1239,180,113,Narrow Body,1.0
+IXC,DEL,146,60,42,Narrow Body,6.0
+IXC,HYD,934,170,89,Narrow Body,2.0
+IXC,BLR,1208,185,98,Narrow Body,4.0
+IXC,GOI,1072,165,84,Narrow Body,1.0
+IXC,GOX,1048,165,84,Narrow Body,2.0
+IXC,PNQ,854,145,177,Narrow Body,1.0
+IXC,BOM,836,155,77,Narrow Body,9.0
+IXC,AMD,583,115,65,Narrow Body,5.0
+IXJ,SXR,89,50,45,Narrow Body,8.0
+IXJ,IXL,185,50,92,Narrow Body,1.0
+IXJ,DEL,314,90,58,Narrow Body,11.0
+IXJ,IDR,690,125,122,Narrow Body,1.0
+SXR,IXJ,89,50,48,Narrow Body,8.0
+SXR,ATQ,157,60,72,Narrow Body,2.0
+SXR,IXC,257,65,68,Narrow Body,4.0
+SXR,DEL,398,100,99,Narrow Body,41.0
+SXR,HYD,1179,160,230,Narrow Body,1.0
+SXR,BOM,1035,195,177,Narrow Body,7.0
 AMD,JDH,220,80,62,Turbo-prop,1.0
 AMD,JAI,326,80,53,Turbo-prop,3.0
 AMD,AGR,436,120,99,Turbo-prop,1.0
@@ -550,11 +686,105 @@ LKO,AGR,182,65,23,Turbo-prop,1.0
 LKO,IXD,105,50,20,Turbo-prop,1.0
 DED,JAI,273,75,63,Turbo-prop,2.0
 DED,IXD,393,95,49,Turbo-prop,1.0
+KJB,BLR,176,55,19,Turbo-prop,1.0
+KJB,VTZ,361,95,32,Turbo-prop,1.0
+RJA,MAA,304,90,40,Turbo-prop,1.0
+RJA,BLR,384,110,42,Turbo-prop,2.0
+RJA,HYD,223,80,51,Turbo-prop,5.0
+VGA,MAA,247,95,50,Turbo-prop,2.0
+VGA,TIR,216,75,27,Turbo-prop,1.0
+VGA,BLR,309,90,50,Turbo-prop,4.0
+VGA,CDP,193,65,26,Turbo-prop,1.0
+VGA,HYD,163,70,29,Turbo-prop,6.0
+VGA,SAG,474,155,86,Turbo-prop,1.0
+VGA,VTZ,180,65,29,Turbo-prop,1.0
+BHU,BOM,189,70,94,Turbo-prop,2.0
+BHU,PNQ,246,75,40,Turbo-prop,3.0
+IXR,CCU,203,80,58,Turbo-prop,4.0
+IXR,DGH,117,60,31,Turbo-prop,1.0
+IXG,BLR,276,95,52,Turbo-prop,2.0
+IXG,HYD,269,80,31,Turbo-prop,1.0
+HBX,BLR,230,85,52,Turbo-prop,2.0
+HBX,MAA,378,110,48,Turbo-prop,1.0
+HBX,HYD,256,80,31,Turbo-prop,1.0
+HBX,BOM,296,80,54,Turbo-prop,1.0
+IXE,HYD,377,115,80,Turbo-prop,2.0
+IXE,MAA,356,100,71,Turbo-prop,1.0
+MYQ,HYD,365,120,28,Turbo-prop,2.0
+MYQ,MAA,243,70,50,Turbo-prop,1.0
+CNN,HYD,414,120,81,Turbo-prop,1.0
+CNN,BLR,170,70,51,Turbo-prop,2.0
+CNN,MAA,321,110,39,Turbo-prop,1.0
+CNN,COK,134,55,33,Turbo-prop,1.0
+CNN,TRV,254,85,35,Turbo-prop,1.0
+COK,AGX,290,80,79,Turbo-prop,1.0
+COK,CNN,134,55,30,Turbo-prop,1.0
+COK,TRV,120,60,30,Turbo-prop,1.0
+CCJ,MAA,312,105,53,Turbo-prop,2.0
+CCJ,HYD,452,130,76,Turbo-prop,1.0
+GWL,HYD,625,135,67,Turbo-prop,1.0
+GWL,BLR,904,140,67,Turbo-prop,3.0
+IDR,HYD,415,70,47,Turbo-prop,1.0
+IDR,SAG,228,95,34,Turbo-prop,1.0
+IDR,NAG,236,80,36,Turbo-prop,2.0
+IDR,RPR,394,75,50,Turbo-prop,1.0
+IDR,AMD,202,60,33,Turbo-prop,3.0
+IDR,JLR,272,85,33,Turbo-prop,1.0
+IDR,UDR,177,60,32,Turbo-prop,1.0
+IDR,IXD,418,100,36,Turbo-prop,1.0
+IDR,JDH,298,90,37,Turbo-prop,1.0
+IDR,JAI,283,80,46,Turbo-prop,1.0
+IDR,LKO,423,115,54,Turbo-prop,2.0
+JLR,HYD,423,130,166,Turbo-prop,1.0
+JLR,IDR,272,90,32,Turbo-prop,1.0
+IXU,HYD,269,85,50,Turbo-prop,2.0
+KLH,BLR,330,105,51,Turbo-prop,1.0
+KLH,TIR,408,115,35,Turbo-prop,1.0
+KLH,HYD,276,80,44,Turbo-prop,1.0
+NAG,HYD,269,105,50,Turbo-prop,2.0
+NAG,AMD,432,120,45,Turbo-prop,2.0
+NAG,IDR,236,80,38,Turbo-prop,2.0
+NAG,LKO,408,130,54,Turbo-prop,1.0
+ISK,GOX,292,110,32,Turbo-prop,1.0
+ISK,NAG,347,100,39,Turbo-prop,1.0
+ISK,AMD,227,100,36,Turbo-prop,1.0
+JDH,AMD,220,80,42,Turbo-prop,1.0
+JDH,IDR,298,90,38,Turbo-prop,1.0
+JDH,JAI,175,60,43,Turbo-prop,1.0
+IXM,BLR,233,85,65,Turbo-prop,3.0
+IXM,MAA,259,60,48,Turbo-prop,6.0
+TRZ,BLR,181,80,42,Turbo-prop,2.0
+TRZ,MAA,183,70,42,Turbo-prop,4.0
+AGR,AMD,436,135,47,Turbo-prop,1.0
+AGR,LKO,182,65,19,Turbo-prop,1.0
+BEK,JAI,248,70,31,Turbo-prop,1.0
+GOP,DEL,408,85,66,Turbo-prop,1.0
+GOP,CCU,421,110,61,Turbo-prop,1.0
+KNU,DEL,248,70,64,Turbo-prop,2.0
+IXD,BBI,442,110,48,Turbo-prop,1.0
+IXD,RPR,294,100,60,Turbo-prop,1.0
+IXD,BHO,313,95,43,Turbo-prop,1.0
+IXD,IDR,418,120,45,Turbo-prop,1.0
+IXD,DED,393,115,43,Turbo-prop,1.0
+IXD,LKO,105,55,20,Turbo-prop,1.0
+VNS,BBI,405,110,58,Turbo-prop,1.0
+VNS,DEL,414,105,62,Turbo-prop,2.0
+IXC,JAI,272,70,41,Turbo-prop,3.0
+PNY,BLR,165,60,64,Turbo-prop,2.0
+PNY,HYD,374,105,96,Turbo-prop,2.0
 AMD,BHJ,188,60,43,Regional Jet,2.0
 AMD,IXG,514,85,78,Regional Jet,2.0
 BLR,HBX,230,95,44,Regional Jet,1.0
 BLR,GBI,288,90,191,Regional Jet,1.0
 BLR,IXX,325,70,180,Regional Jet,1.0
+STV,IXG,383,85,46,Regional Jet,2.0
+STV,KQH,400,80,50,Regional Jet,2.0
+IXG,TIR,363,65,48,Regional Jet,2.0
+IXG,AMD,514,100,144,Regional Jet,1.0
+IXG,STV,383,80,46,Regional Jet,2.0
+GBI,BLR,288,85,192,Regional Jet,1.0
+GBI,TIR,306,70,46,Regional Jet,2.0
+KQH,STV,400,80,50,Regional Jet,2.0
 AMD,HYD,551,105,69,Others,2.0
 AMD,GOX,513,100,60,Others,2.0
 BLR,GOI,299,75,26,Others,1.0
@@ -572,4 +802,6 @@ DEL,IXB,698,115,77,Others,1.0
 GAU,BOM,1286,210,105,Others,2.0
 LKO,BLR,958,160,55,Others,1.0
 LKO,GOI,907,150,69,Others,1.0
+COK,BLR,228,60,35,Others,1.0
+VNS,BLR,910,145,100,Others,2.0
 DEL,COK,1272,195,88,Wide Body,1.0

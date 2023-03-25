@@ -102,15 +102,21 @@
                             <input type="number" name="NEW_FORECAST_YEAR" id="FORECAST_YEAR" value="{{ general_params_info.FORECAST_YEAR }}" min="2023" max="2043" step="1">
                         </div>
                         <div class="param-config">
+                            <label>ROUTE TYPE:</label>
+                            <select id="ONLY_HUBS" name="NEW_ONLY_HUBS">
+                                <option value="False" {% if general_params_info.ONLY_HUBS == False %}selected{% endif %}>TO ANY AIRPORT</option>
+                                <option value="True" {% if general_params_info.ONLY_HUBS == True %}selected{% endif %}>ONLY TO HUBS</option>
+                            </select>      
+                        </div>
+                        <div class="param-config">
                             <label>Sample:</label>
                             <select id="SAMPLE_NAME" name="NEW_SAMPLE_NAME" value="{{ general_params_info.SAMPLE_NAME }}">
                                 <option value="Sample1">Sample 1</option>
-                                <option value="Sample22">Sample 22</option>
                             </select>      
                         </div>
                     </div>
                     <div id="params-submit">
-                        <input type="submit" value="Submit">
+                        <input type="submit" value="UPDATE">
                     </div>
                 </div>
             </div>

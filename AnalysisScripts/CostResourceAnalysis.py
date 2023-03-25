@@ -23,6 +23,7 @@ def CostResourceAnalysis_Script(selected_route, general_params, route_params, pr
     FLEET_TURBOPROP = general_params['FLEET_TURBOPROP']
     TOP_N_COMBO = 3
     analysis_points = general_params['ANALYSIS_POINTS']
+    DEMAND_FULFILMENT_RATE = general_params['DEMAND_FULFILMENT_RATE']
 
     PRICE_IN = route_params['PRICE_IN']
     PRICE_OUT = route_params['PRICE_OUT']
@@ -43,12 +44,19 @@ def CostResourceAnalysis_Script(selected_route, general_params, route_params, pr
             year_forecasts = forecasts[forecasts['Year'] == year]
             in_demand = year_forecasts.iloc[0]['AdjustedForecastedDemand_InTraffic']
             out_demand = year_forecasts.iloc[0]['AdjustedForecastedDemand_OutTraffic']
-            EARNINGS.append(
-                (
-                    (in_demand * MARKET_SHARE_IN * current_price_in) +
-                    (out_demand * MARKET_SHARE_OUT * current_price_out)
-                )
-            )
+            total_capacity_narrow = CAPACITY_NARROWBODY * num_narrow
+            total_capacity_turbo = CAPACITY_NARROWBODY * num_turbo
+            in_passengers = 0
+            out_passengers = 0
+            if((total_capacity_narrow + total_capacity_turbo) < in_demand * MARKET_SHARE_IN):
+                in_passengers = (total_capacity_narrow + total_capacity_turbo)
+            else:
+                in_passengers = in_demand * MARKET_SHARE_IN
+            if((total_capacity_narrow + total_capacity_turbo) < out_demand * MARKET_SHARE_OUT):
+                out_passengers = (total_capacity_narrow + total_capacity_turbo)
+            else:
+                out_passengers = out_demand * MARKET_SHARE_OUT
+            EARNINGS.append((in_passengers * current_price_in) + (out_passengers * current_price_out))
             current_price_in = inflation(current_price_in)
             current_price_out = inflation(current_price_out)
         
@@ -123,8 +131,8 @@ def CostResourceAnalysis_Script(selected_route, general_params, route_params, pr
         forecast_file = f"{output_save_path}/Forecasted_Route_Demand/City{SELECTED_CITY}_Hub{SELECTED_HUB_AIRPORT}.csv"
         forecasts = pd.read_csv(forecast_file)
 
-        DEMAND_IN_MAX = forecasts[forecasts['Year'] == PRESENT_YEAR].iloc[0]['AdjustedForecastedDemand_InTraffic']
-        DEMAND_OUT_MAX = forecasts[forecasts['Year'] == PRESENT_YEAR].iloc[0]['AdjustedForecastedDemand_OutTraffic']
+        DEMAND_IN_MAX = forecasts[forecasts['Year'] == PRESENT_YEAR].iloc[0]['AdjustedForecastedDemand_InTraffic'] * DEMAND_FULFILMENT_RATE / 100.0
+        DEMAND_OUT_MAX = forecasts[forecasts['Year'] == PRESENT_YEAR].iloc[0]['AdjustedForecastedDemand_OutTraffic'] * DEMAND_FULFILMENT_RATE / 100.0
 
         a_in = 365 * CAPACITY_NARROWBODY * (PRICE_IN_MARKET ** MARKET_SHARE_PRICE_FACTOR)
         b_in = 365 * CAPACITY_TURBOPROP * (PRICE_IN_MARKET ** MARKET_SHARE_PRICE_FACTOR)
@@ -180,8 +188,12 @@ def CostResourceAnalysis_Script(selected_route, general_params, route_params, pr
 
         DEMAND_IN_MAX_LIST = np.zeros(FORECAST_YEAR - PRESENT_YEAR + 1)
         DEMAND_OUT_MAX_LIST = np.zeros(FORECAST_YEAR - PRESENT_YEAR + 1)
+        DEMAND_IN_MIN_LIST = np.zeros(FORECAST_YEAR - PRESENT_YEAR + 1)
+        DEMAND_OUT_MIN_LIST = np.zeros(FORECAST_YEAR - PRESENT_YEAR + 1)
         DEMAND_IN_MAX = 0
         DEMAND_OUT_MAX = 0
+        DEMAND_IN_MIN = np.inf
+        DEMAND_OUT_MIN = np.inf
         count_list = []
         year_idx_list = []
         count = 0
@@ -192,12 +204,16 @@ def CostResourceAnalysis_Script(selected_route, general_params, route_params, pr
 
                 DEMAND_IN_MAX_LIST[year_idx] = DEMAND_IN_MAX
                 DEMAND_OUT_MAX_LIST[year_idx] = DEMAND_OUT_MAX
+                DEMAND_IN_MIN_LIST[year_idx] = DEMAND_IN_MIN
+                DEMAND_OUT_MIN_LIST[year_idx] = DEMAND_OUT_MIN
                 count_list.append(count)
                 year_idx_list.append(year_idx)
 
                 count = 0
                 DEMAND_IN_MAX = 0
                 DEMAND_OUT_MAX = 0
+                DEMAND_IN_MIN = np.inf
+                DEMAND_OUT_MIN = np.inf
 
             if(year <= FORECAST_YEAR):
                 year_forecasts = forecasts[forecasts['Year'] == year]
@@ -207,6 +223,12 @@ def CostResourceAnalysis_Script(selected_route, general_params, route_params, pr
                     DEMAND_IN_MAX = in_demand
                 if(out_demand > DEMAND_OUT_MAX):
                     DEMAND_OUT_MAX = out_demand
+                if(in_demand < DEMAND_IN_MIN):
+                    # DEMAND_IN_MIN = in_demand
+                    DEMAND_IN_MIN = 0
+                if(out_demand < DEMAND_OUT_MIN):
+                    # DEMAND_OUT_MIN = out_demand
+                    DEMAND_OUT_MIN = 0
                 count += 1
 
         def add_to_deepest_list(a, b):
@@ -225,20 +247,22 @@ def CostResourceAnalysis_Script(selected_route, general_params, route_params, pr
 
                 DEMAND_IN_MAX = DEMAND_IN_MAX_LIST[year_idx]
                 DEMAND_OUT_MAX = DEMAND_OUT_MAX_LIST[year_idx]
+                DEMAND_IN_MIN = DEMAND_IN_MIN_LIST[year_idx]
+                DEMAND_OUT_MIN = DEMAND_OUT_MIN_LIST[year_idx]
 
                 a_in = 0
                 b_in = 0
                 h_in = 0
                 g_in = 365 * (CAPACITY_NARROWBODY) / 2
                 f_in = 365 * (CAPACITY_TURBOPROP) / 2
-                c_in = -MARKET_SHARE_IN * DEMAND_IN_MAX
+                c_in = -MARKET_SHARE_IN * (DEMAND_IN_MIN + DEMAND_FULFILMENT_RATE / 100.0 * (DEMAND_IN_MAX - DEMAND_IN_MIN))
 
                 a_out = 0
                 b_out = 0
                 h_out = 0
                 g_out = 365 * (CAPACITY_NARROWBODY) / 2
                 f_out = 365 * (CAPACITY_TURBOPROP) / 2
-                c_out = -MARKET_SHARE_OUT * DEMAND_OUT_MAX
+                c_out = -MARKET_SHARE_OUT * (DEMAND_OUT_MIN + DEMAND_FULFILMENT_RATE / 100.0 * (DEMAND_OUT_MAX - DEMAND_OUT_MIN))
 
                 solutions_in = []
                 for n_narrow in np.arange(prev_num_narrowbody, FLEET_NARROWBODY + 1):
@@ -410,7 +434,7 @@ def plotly_CostResourceAnalysis(option_idx, CITY_AIRPORT, HUB_AIRPORT, years, EX
     )
     
     fig1.update_layout(
-        title_text = f"MARKET SHARE:",
+        title_text = f"<b>MARKET SHARE:</b>",
         height = 700, width = 250,
         paper_bgcolor = '#DBD8FD' , plot_bgcolor = '#DBD8FD',
         titlefont = dict(size = 20),
@@ -447,7 +471,7 @@ def plotly_CostResourceAnalysis(option_idx, CITY_AIRPORT, HUB_AIRPORT, years, EX
     )
     
     fig2.update_layout(
-        title_text = "PROFITABILITY",
+        title_text = "<b>PROFITABILITY:</b>",
         height = 700, width = 450,
         paper_bgcolor = '#DBD8FD' , plot_bgcolor = '#DBD8FD',
         titlefont = dict(size = 20),
@@ -526,8 +550,8 @@ def plotly_CostResourceAnalysis(option_idx, CITY_AIRPORT, HUB_AIRPORT, years, EX
     
     fig3.add_trace(
         go.Line(
-            x = years, y = [100*(1-x) for x in total_flight_vacancies], name = 'Occupancy Rate',
-            hovertext = [f"Year: {x}<br>Profit Margin: {y:.1f}%" for x, y in zip(years, [100*(1-x) for x in total_flight_vacancies])],
+            x = years, y = [np.max([0, np.min([100, 100*(1-x)])]) for x in total_flight_vacancies], name = 'Occupancy Rate',
+            hovertext = [f"Year: {x}<br>Occupancy Rate: {y:.1f}%" for x, y in zip(years, [np.max([0, np.min([100, 100*(1-x)])]) for x in total_flight_vacancies])],
             hoverinfo = 'text', line = dict(color = '#2C88D9'),
             showlegend = False
         ),
@@ -535,7 +559,7 @@ def plotly_CostResourceAnalysis(option_idx, CITY_AIRPORT, HUB_AIRPORT, years, EX
     )
     
     fig3.update_layout(
-        title_text = "DEMAND FULFILMENT",
+        title_text = "<b>DEMAND FULFILMENT:</b>",
         height = 700, width = 450,
         paper_bgcolor = '#DBD8FD' , plot_bgcolor = '#DBD8FD',
         titlefont = dict(size = 20),
