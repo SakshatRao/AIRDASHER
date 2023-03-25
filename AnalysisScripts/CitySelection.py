@@ -271,6 +271,8 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
                 city_data = pd.DataFrame([city_data.sum(axis = 0)], columns = city_data.columns)
                 city_data['City'] = pd.Series([''] * city_data.shape[0])
                 city_data = city_data[[*city_data.columns[-1:]] + [*city_data.columns[:-1]]]
+            elif(mapped_city == ''):
+                city_data = pd.DataFrame.from_dict({'City': [city], 'pop2023': [np.nan]})
             else:
                 city_data = preprocessor.latest_population_data[preprocessor.latest_population_data['city'] == mapped_city]
                 city_data = city_data.drop(['latitude', 'longitude'], axis = 1)
