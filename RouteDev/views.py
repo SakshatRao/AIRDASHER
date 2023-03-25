@@ -159,7 +159,6 @@ def CitySelection(request):
             print("PROBLEM SEEN WITH PLOTLY GRAPHS!")
             pass
     
-    print(general_params.ONLY_HUBS)
     context = {
         'general_params_info': general_params,
         'cities_info': cities,

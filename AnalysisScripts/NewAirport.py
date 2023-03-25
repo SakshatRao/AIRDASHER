@@ -15,69 +15,14 @@ from plotly.subplots import make_subplots
 
 from collections import OrderedDict
 
-class Airport:
-    def __init__(self):
-        self.airport_info = {}
-        self.to_list = []
-        self.from_list = []
-        self.to_airport_list = []
-        self.from_airport_list = []
-
-    def __str__(self):
-        return self.airport_info['Name']
-
-    def init_airport_info(self, airport_info):
-        self.airport_info = airport_info
-
-    def add_to_list(self, to_route):
-        self.to_list.append(to_route)
-        self.update_to_airports()
-
-    def add_from_list(self, from_route):
-        self.from_list.append(from_route)
-        self.update_from_airports()
-
-    def update_to_airports(self):
-        self.to_airport_list = [x.to_airport for x in self.to_list]
-
-    def update_from_airports(self):
-        self.from_airport_list = [x.from_airport for x in self.from_list]
-
-class Route:
-    def __init__(self):
-        self.from_airport = None
-        self.to_airport = None
-        self.route_info = {}
-
-    def __str__(self):
-        return str(self.from_airport) + "-" + str(self.to_airport)
-
-    def init_from_to(self, from_airport, to_airport):
-        self.from_airport = from_airport
-        self.to_airport = to_airport
-        return self.update_from_to_list()
-
-    def init_route_info(self, route_info):
-        self.route_info = route_info
-
-    def update_from_to_list(self):
-        self.to_airport.add_from_list(self)
-        self.from_airport.add_to_list(self)
-        return self.from_airport, self.to_airport
-
 # Script for selecting city with highest growth potential
-def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, output_save_path, plotly_save_path):
+def NewAirport_Script(general_params, preprocessor, tier_1_2_cities_raw, output_save_path, plotly_save_path):
 
     PRESENT_YEAR = general_params['PRESENT_YEAR']
     FORECAST_YEAR = general_params['FORECAST_YEAR']
-    SAMPLE_NAME = general_params['SAMPLE_NAME']
-
-    preprocessor.network_data = preprocessor.all_samples_network_data[SAMPLE_NAME]
 
     city_to_airport_map = dict(zip(preprocessor.city_mapping['City'].values, preprocessor.city_mapping['AirRouteData_AirportCode']))
-    tier_1_2_cities = [x for x in tier_1_2_cities_raw if pd.isnull(city_to_airport_map[x]) == False]
-    # tier_1_2_cities = tier_1_2_cities_raw
-    tier_1_2_cities_airports = preprocessor.city_mapping['AirRouteData_AirportCode'].dropna().values
+    tier_1_2_cities = [x for x in tier_1_2_cities_raw if pd.isnull(city_to_airport_map[x]) == True]
 
     def get_economic_data(cities):
         city_to_district_economic_data_mapping = dict(zip(preprocessor.city_mapping['City'], preprocessor.city_mapping['EconomicData_District']))
@@ -107,7 +52,7 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
                     elif(district == 'AURANGABAD'):
                         city_economic_data = preprocessor.economic_data[(preprocessor.economic_data['District'] == district) & (preprocessor.economic_data['State'] == 'Maharashtra')]
                     elif(district == 'HAMIRPUR'):
-                        city_economic_data = preprocessor.economic_data[(preprocessor.economic_data['District'] == district) & (preprocessor.economic_data['State'] == 'Himachal Pradesh')]
+                        city_economic_data = preprocessor.economic_data[(preprocessor.economic_data['District'] == district) & (preprocessor.economic_data['State'] == 'HimachalPradesh')]
                     else:
                         city_economic_data = preprocessor.economic_data[preprocessor.economic_data['District'] == district]
                 city_economic_data = city_economic_data.sort_values("Year").reset_index(drop = True)
@@ -220,6 +165,10 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
                         district_education_data = preprocessor.education_data[(preprocessor.education_data['District'] == district) & (preprocessor.education_data['State'] == 'CHHATTISGARH')]
                     elif(district == 'AURANGABAD'):
                         district_education_data = preprocessor.education_data[(preprocessor.education_data['District'] == district) & (preprocessor.education_data['State'] == 'MAHARASHTRA')]
+                    elif(district == 'HAMIRPUR'):
+                        district_education_data = preprocessor.education_data[(preprocessor.education_data['District'] == district) & (preprocessor.education_data['State'] == 'HIMACHAL PRADESH')]
+                    elif(district == 'BIJAPUR'):
+                        district_education_data = preprocessor.education_data[(preprocessor.education_data['District'] == district) & (preprocessor.education_data['State'] == 'KARNATAKA')]
                     else:
                         district_education_data = preprocessor.education_data[preprocessor.education_data['District'] == district]
                 else:
@@ -232,7 +181,12 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
                 if(yearly_district_education_data.shape[0] == 0):
                     district_education_history[:, years.index(year)] = np.nan
                     continue
-                assert(yearly_district_education_data.shape[0] == 1)
+                try:
+                    assert(yearly_district_education_data.shape[0] == 1)
+                except:
+                    print(district)
+                    print(state)
+                    exit(1)
                 for col_idx, col in enumerate(yearly_district_education_data.columns[:-3]):
                     district_education_history[col_idx, years.index(year)] += yearly_district_education_data.iloc[0][col]
             district_education_latestyear = [2011] * district_education_history.shape[0]
@@ -265,9 +219,18 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
             else:
                 if(district == 'Bilaspur'):
                     district_data = preprocessor.pop_area_household_data[(preprocessor.pop_area_household_data['District'] == district) & (preprocessor.pop_area_household_data['StateCode'] == 22)]
+                elif(district == 'Hamirpur'):
+                    district_data = preprocessor.pop_area_household_data[(preprocessor.pop_area_household_data['District'] == district) & (preprocessor.pop_area_household_data['StateCode'] == 2)]
+                elif(district == 'Bijapur'):
+                    district_data = preprocessor.pop_area_household_data[(preprocessor.pop_area_household_data['District'] == district) & (preprocessor.pop_area_household_data['StateCode'] == 29)]
                 else:
                     district_data = preprocessor.pop_area_household_data[preprocessor.pop_area_household_data['District'] == district]
-            assert(district_data.shape[0] == 1)
+            try:
+                assert(district_data.shape[0] == 1)
+            except:
+                print(district_data.shape)
+                print(district)
+                exit(1)
             district_data = pd.DataFrame(district_data.values[:, 4:], columns = [x + '_population_latest' for x in district_data.columns[4:]])
             district_data['City'] = pd.Series([city])
             pop_area_household_data = pd.concat([pop_area_household_data, district_data], axis = 0)
@@ -546,96 +509,25 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
         pred_traffic_df = new_pred_traffic_df.copy()
         pred_traffic_df['Year'] = pd.Series(np.repeat(year, pred_traffic_df.shape[0]))
         all_pred_traffic = pd.concat([all_pred_traffic, pred_traffic_df], axis = 0)
-        if(year != PRESENT_YEAR):
-            new_data_pca_X_df.to_csv(f'{output_save_path}/Forecasted_Features/{year}.csv', index = None)
-        else:
+        if(year == PRESENT_YEAR):
             present_year_forecasts = new_pred_traffic_df
         if(year == FORECAST_YEAR):
             forecasted_traffic_df =  new_pred_traffic_df
 
     airport_current_traffic_df = pd.merge(airport_traffic_data, present_year_forecasts, on = 'City')
     def get_current_traffic(row):
-        if(pd.isnull(row['In_Out_Traffic_target'])):
-            return row['PredictedFutureTraffic']
-        else:
-            return (row['In_Out_Traffic_target'] + 3 * row['PredictedFutureTraffic']) / 4
+        return row['PredictedFutureTraffic']
     airport_current_traffic_df['CurrentTraffic'] = airport_current_traffic_df.apply(get_current_traffic, axis = 1)
     airport_current_traffic_df = airport_current_traffic_df[['City', 'CurrentTraffic']]
 
     all_traffic_df = pd.merge(airport_current_traffic_df, forecasted_traffic_df, on = 'City')
-    all_traffic_df['GrowthRate'] = (all_traffic_df['PredictedFutureTraffic'] - all_traffic_df['CurrentTraffic']) / all_traffic_df['CurrentTraffic'] * 100 / (FORECAST_YEAR - PRESENT_YEAR)
+    all_traffic_df['GrowthRate'] = all_traffic_df['PredictedFutureTraffic']
 
     most_growth_cities = all_traffic_df.sort_values("GrowthRate", ascending = False)
-    most_growth_cities['Airport'] = most_growth_cities['City'].map(dict(zip(preprocessor.city_mapping['City'].values, preprocessor.city_mapping['AirRouteData_AirportCode'].values)))
     most_growth_cities['Latitude_Longitude'] = most_growth_cities['City'].map(dict(zip(preprocessor.city_mapping['City'].values, preprocessor.city_mapping['Airport_City_Coords'].values)))
     most_growth_cities['Latitude'] = most_growth_cities['Latitude_Longitude'].apply(lambda x: float(x.split(', ')[0].strip()))
     most_growth_cities['Longitude'] = most_growth_cities['Latitude_Longitude'].apply(lambda x: float(x.split(', ')[1].strip()))
     most_growth_cities = most_growth_cities.drop('Latitude_Longitude', axis = 1)
-    most_growth_cities['Airport'] = most_growth_cities['Airport'].fillna('')
-
-    uniq_hubs = preprocessor.network_data[preprocessor.network_data['FromHub'] == 1]['From'].unique()
-    airport_df = preprocessor.all_airport_data.copy()
-    airport_df['IsHub'] = pd.Series(np.zeros(airport_df.shape[0]))
-    for airport in uniq_hubs:
-        airport_idx = airport_df[airport_df['Name'] == airport].index[0]
-        airport_df.loc[airport_idx, "IsHub"] = 1
-    airport_df = airport_df[['Name', 'City/Town', 'IsHub']]
-
-    def plot_network(
-        raw_route_df, raw_airport_df,
-        USE_ONLY_SELECTIVE_CITIES = True, to_use_airports = []
-    ):
-        route_df = raw_route_df.copy()
-        route_attr_cols = [x for x in route_df.columns if x not in ['From', 'To']]
-
-        airport_df = raw_airport_df.copy()
-
-        if(USE_ONLY_SELECTIVE_CITIES):
-            # Filterer
-            exclude_idx = []
-            for idx, row in route_df.iterrows():
-                if((row['From'] not in to_use_airports) or (row['To'] not in to_use_airports)):
-                    exclude_idx.append(idx)
-            route_df = route_df.drop(exclude_idx, axis = 0).reset_index(drop = True)
-
-            exclude_idx = []
-            for idx, row in airport_df.iterrows():
-                if(row['Name'] not in to_use_airports):
-                    exclude_idx.append(idx)
-            airport_df = airport_df.drop(exclude_idx, axis = 0).reset_index(drop = True)
-
-        airport_df['Latitude_Longitude'] = airport_df['Name'].map(dict(zip(preprocessor.city_mapping['AirRouteData_AirportCode'].values, preprocessor.city_mapping['Airport_City_Coords'])))
-        airport_df['Latitude'] = airport_df['Latitude_Longitude'].apply(lambda x: float(x.split(', ')[0].strip()))
-        airport_df['Longitude'] = airport_df['Latitude_Longitude'].apply(lambda x: float(x.split(', ')[1].strip()))
-        airport_df = airport_df.drop('Latitude_Longitude', axis = 1)
-        airport_attr_cols = [x for x in airport_df.columns]
-
-        AIRPORTS = {}
-        ROUTES = {}
-
-        for idx, row in airport_df.iterrows():
-            airport_obj = Airport()
-            airport_attr = dict([(x, row[x]) for x in airport_attr_cols])
-            airport_obj.init_airport_info(airport_attr)
-            AIRPORTS[row['Name']] = airport_obj
-
-        for idx, row in route_df.iterrows():
-            route_obj = Route()
-            AIRPORTS[row['From']], AIRPORTS[row['To']] = route_obj.init_from_to(AIRPORTS[row['From']], AIRPORTS[row['To']])
-            route_attr = dict([(x, row[x]) for x in route_attr_cols])
-            route_obj.init_route_info(route_attr)
-            ROUTES[f"{row['From']}-{row['To']}"] = route_obj
-
-        return AIRPORTS, ROUTES
-
-    AIRPORTS, ROUTES = plot_network(
-        preprocessor.network_data.assign(Dummy = np.ones(preprocessor.network_data.shape[0]) * -1),
-        airport_df[(airport_df['Name'].isin(preprocessor.network_data['From'].unique())) | (airport_df['Name'].isin(preprocessor.network_data['To'].unique()))],
-        USE_ONLY_SELECTIVE_CITIES = True, to_use_airports = tier_1_2_cities_airports
-    )
-
-    airport_to_city_mapping = dict(zip(preprocessor.city_mapping['AirRouteData_AirportCode'].values, preprocessor.city_mapping['City'].values))
-    most_growth_cities = most_growth_cities[~most_growth_cities['City'].isin([airport_to_city_mapping[x] for x in AIRPORTS])]
 
     most_growth_cities = most_growth_cities.head(20)
     most_growth_cities = most_growth_cities[most_growth_cities['GrowthRate'] > 0].reset_index(drop = True)
@@ -649,11 +541,11 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
     for x in plot_info_keys:
         plot_info_all_keys.extend(x)
     sel_pred_traffic = all_pred_traffic[all_pred_traffic['City'].isin(most_growth_cities_names)]
-    plotly_CitySelection(most_growth_cities_names, [(x, plot_info[x]) for x in plot_info_all_keys], sel_pred_traffic, plotly_save_path)
+    plotly_NewAirports(most_growth_cities_names, [(x, plot_info[x]) for x in plot_info_all_keys], sel_pred_traffic, plotly_save_path)
     
-    return OrderedDict(most_growth_cities.set_index('City').to_dict(orient = 'index')), AIRPORTS
+    return OrderedDict(most_growth_cities.set_index('City').to_dict(orient = 'index'))
 
-def plotly_CitySelection(cities, plot_info, pred_traffic, plotly_save_path):
+def plotly_NewAirports(cities, plot_info, pred_traffic, plotly_save_path):
     
     for city in cities:
         fig1 = make_subplots(
@@ -668,7 +560,7 @@ def plotly_CitySelection(cities, plot_info, pred_traffic, plotly_save_path):
             go.Bar(
                 x = year, y =vals,
                 hovertext = [f"Year: {x}<br>Passenger Forecast: {int(y)}" for x, y in zip(year, vals)],
-                hoverinfo = 'text', marker = dict(color = '#2C88D9')
+                hoverinfo = 'text', marker = dict(color = '#1AAE9F')
             ),
             row = 1, col = 1
         )
@@ -676,7 +568,7 @@ def plotly_CitySelection(cities, plot_info, pred_traffic, plotly_save_path):
         fig1.update_layout(
             title_text = f"Forecasted Total Air-traffic Demand for {city}",
             height = 700, width = 500,
-            paper_bgcolor = '#DBD8FD' , plot_bgcolor = '#DBD8FD',
+            paper_bgcolor = '#B8F4EE' , plot_bgcolor = '#B8F4EE',
             titlefont = dict(size = 20),
         )
         
@@ -732,7 +624,7 @@ def plotly_CitySelection(cities, plot_info, pred_traffic, plotly_save_path):
                 fig2.add_trace(
                     go.Scatter(
                         x = col_info['all_years'], y = col_info['fit_y'] - 1,
-                        mode = 'lines', line = dict(color = '#2C88D9'),
+                        mode = 'lines', line = dict(color = '#1AAE9F'),
                         hovertemplate = None, hoverinfo = "skip",
                         name = 'Fitted Exponential Curve', legendgroup = f"{col_idx}2", **showlegend_dict
                     ),
@@ -742,7 +634,7 @@ def plotly_CitySelection(cities, plot_info, pred_traffic, plotly_save_path):
                 fig2.add_trace(
                     go.Scatter(
                         x = [col_info['all_years'][-1]], y = [col_info['forecast']],
-                        mode = 'markers', marker = dict(color = '#2C88D9', size = 15, opacity = 0.3),
+                        mode = 'markers', marker = dict(color = '#1AAE9F', size = 15, opacity = 0.3),
                         hovertemplate = None, hoverinfo = "skip",
                         name = 'Forecast', legendgroup = f"{col_idx}3", **showlegend_dict
                     ),
@@ -754,7 +646,7 @@ def plotly_CitySelection(cities, plot_info, pred_traffic, plotly_save_path):
         fig2.update_layout(
             title_text = f"Doubling period for various Macro-Economic Factors",
             titlefont = dict(size = 20),
-            paper_bgcolor = '#DBD8FD' , plot_bgcolor = '#DBD8FD',
+            paper_bgcolor = '#B8F4EE' , plot_bgcolor = '#B8F4EE',
             height = 700, width = 700,
             legend = dict(
                 orientation="h",
@@ -775,10 +667,10 @@ def plotly_CitySelection(cities, plot_info, pred_traffic, plotly_save_path):
         #   pyo.plot(fig2, output_type = 'file', filename = f'{plotly_save_path}/{city}_CityRouteSelection2.html', config = {"displayModeBar": False, "showTips": False})
         
         div1 = pyo.plot(fig1, output_type = 'div', include_plotlyjs = False, show_link = False, link_text = "", config = {"displayModeBar": False, "showTips": False})
-        with open(f'{plotly_save_path}/{city}_CitySelection_Graph1.txt', 'w') as save_file:
+        with open(f'{plotly_save_path}/{city}_NewAirports_Graph1.txt', 'w') as save_file:
             save_file.write(div1)
         div2 = pyo.plot(fig2, output_type = 'div', include_plotlyjs = False, show_link = False, link_text = "", config = {"displayModeBar": False, "showTips": False})
-        with open(f'{plotly_save_path}/{city}_CitySelection_Graph2.txt', 'w') as save_file:
+        with open(f'{plotly_save_path}/{city}_NewAirports_Graph2.txt', 'w') as save_file:
             save_file.write(div2)
 
 # # Testing

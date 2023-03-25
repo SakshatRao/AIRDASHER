@@ -1,0 +1,229 @@
+html {
+    min-height: 100vh;
+}
+
+body {
+    background-color: var(--light3);
+    color: var(--black);
+    margin: 0px 0px;
+    min-height: 100vh;
+}
+
+#all-window {
+    margin: 0% 0%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+#map-content {
+    min-height: 100%;
+    width: 55%;
+}
+
+#map {
+    min-height: 100%;
+    width: 100%;
+}
+
+#right-pane {
+    background-color: var(--light1);
+    width: 45%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    border-left-width: 5px;
+    border-left-color: var(--dark2);
+    border-left-style: solid;
+}
+
+#right-pane-title {
+    text-align: center;
+    margin: 2% 0 0 0;
+}
+
+#right-pane-title h1 {
+    font-size: 3em;
+    margin: 0%;
+}
+
+#cities {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    text-align: center;
+    width: 90%;
+    margin: 0 0 0 0;
+}
+
+.city {
+    background-color: var(--light_green);
+    border: 3px solid var(--green);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2% 0;
+    margin: 0.5% 0;
+}
+
+.city:hover {
+    background-color: var(--green);
+    border-color: var(--black);
+    cursor: pointer;
+}
+
+.city-title h1 {
+    margin: 0 0;
+    font-size: 2em;
+}
+
+.city-info h3 {
+    margin: 1% 0 0 0;
+}
+
+.CityModal {
+    display: None;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.modal-content-outer {
+    width: 90%;
+    margin: 2% auto;
+    background-color: var(--dark1);
+    border: 3px solid var(--dark3);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.close_button {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    margin: 0.5% 1% 0 0;
+    cursor: pointer;
+}
+
+.close {
+    color: var(--dark3);
+    font-weight: bold;
+}
+
+.modal-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.modal-title h1 {
+    font-size: 3em;
+    margin: 0;
+    font-weight: bolder;
+}
+
+.modal-title h3 {
+    margin: 0.5% 0 1% 0;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin: 0 2% 2% 2%;
+}
+
+.modal-content-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    margin: 0 2% 0 0;
+}
+
+.modal-content-graphs {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.select-city {
+    text-decoration: none;
+    cursor: pointer;
+    background-color: var(--green);
+    border: 2px solid var(--black);
+    width: 50%;
+}
+
+.select-city button {
+    padding: 2%;
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--black);
+    font-size: 1.5em;
+    cursor: pointer;
+    width: 100%;
+}
+
+#params {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--black);
+    margin: 0 2%;
+    padding: 2% 2%;
+}
+
+#params-config {
+    width: 90%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0 3% 0;
+}
+
+.param-config label {
+    font-weight: bold;
+}
+
+#params-submit {
+    background-color: var(--green);
+    border: 2px solid var(--black);
+}
+
+#params-submit input {
+    background-color: transparent;
+    border: none;
+    color: var(--white);
+    padding: 8px 15px;
+    cursor: pointer;
+    width: 100%;
+}
+
+#back {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 5%;
+    z-index: 1000;
+}
+
+#back:hover {
+    width: 6%;
+}
+
+#back a img {
+    width: 100%;
+}

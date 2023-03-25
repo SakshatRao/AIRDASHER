@@ -6,6 +6,7 @@ var MAPS_PLOT = MAPS_PLOT || (function(){
     var routes = [];
     var city_coords = [];
     var city_names = [];
+    var main_color = '#2C88D9';
 
     return {
         init_coords : function(coord) {
@@ -28,6 +29,9 @@ var MAPS_PLOT = MAPS_PLOT || (function(){
         },
         init_city_names : function(city_name) {
             city_names.push(city_name)
+        },
+        init_main_color : function(color) {
+            main_color = color
         },
         plot_map : function(sample_network_name, show_network, show_node_link, show_route_link) {
 
@@ -100,8 +104,8 @@ var MAPS_PLOT = MAPS_PLOT || (function(){
                 var circle_info = {};
                 if(show_route_link == 0) {
                     circle_info = {
-                        color: '#2C88D9',
-                        fillColor: '#2C88D9',
+                        color: main_color,
+                        fillColor: main_color,
                         fillOpacity: 0.75,
                         radius: 80000
                     };
@@ -109,7 +113,7 @@ var MAPS_PLOT = MAPS_PLOT || (function(){
                 else {
                     circle_info = {
                         color: 'black',
-                        fillColor: '#2C88D9',
+                        fillColor: main_color,
                         fillOpacity: 1,
                         radius: 80000
                     };
