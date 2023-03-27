@@ -49,7 +49,7 @@
                     {% for route, div in routes_divs_info %}
                     <div id="Route{{ forloop.counter }}" class="route">
                         <div class="route-title">
-                            <h1>{{ route.CITY.NAME }} &#x21D4; {{ route.AIRPORT.NAME }}</h1>
+                            <h1>{{ route.CITY.SHORTENED_NAME }} &#x21D4; {{ route.AIRPORT.SHORTENED_NAME }}</h1>
                         </div>
                         <div class="route-info">
                             <h3>GROWTH RATE: <b>{{ route.GROWTH }}%</b></h3>
@@ -69,9 +69,9 @@
                                             <h1>{{ route.AIRPORT.AIRPORT_NAME }}</h1>
                                         </div>
                                         <div class="modal-title-header2">
-                                            <h2>{{ route.CITY.NAME }}</h2>
+                                            <h2>{{ route.CITY.SHORTENED_NAME }}</h2>
                                             <h3>DISTANCE: {{ route.DISTANCE }} MILES<br>DURATION: {{ route.DURATION }} MINS</h3>
-                                            <h2>{{ route.AIRPORT.NAME }}</h2>
+                                            <h2>{{ route.AIRPORT.SHORTENED_NAME }}</h2>
                                         </div>
                                         <!-- <div class="modal-title-header3">
                                             <h3>( DURATION: {{ route.DURATION }} MINS , DISTANCE: {{ route.DISTANCE }} MILES )</h3>

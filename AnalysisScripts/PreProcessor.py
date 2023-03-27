@@ -22,8 +22,11 @@ class PreProcessor:
 
     def fetch_PreProcessed_AirRouteDatasets(self, input_load_path):
         self.city_mapping = pd.read_csv(f'{input_load_path}/CityMapping.csv')
+        self.intl_city_mapping = pd.read_csv(f'{input_load_path}/IntlCityMapping.csv')
         self.all_network_data = pd.read_csv(f"{input_load_path}/AirRouteDatasets/FlightConnectionsData_Flights.csv")
         self.all_airport_data = pd.read_csv(f"{input_load_path}/AirRouteDatasets/FlightConnectionsData_Airports.csv")
+        self.intl_network_data = pd.read_csv(f"{input_load_path}/AirRouteDatasets/FlightConnectionsData_IntlFlights.csv")
+        self.intl_airport_data = pd.read_csv(f"{input_load_path}/AirRouteDatasets/FlightConnectionsData_IntlAirports.csv")
         all_samples_list = os.listdir(f"{input_load_path}/SampleAirRouteDatasets/")
         self.all_samples_network_data = {}
         for sample in all_samples_list:
@@ -72,3 +75,9 @@ class PreProcessor:
 
         with open(f'{input_load_path}/Models/RouteSelectionModel_coefs.json', 'r') as load_file:
             self.RouteSelection_model_coefs = json.load(load_file)
+        
+        with open(f'{input_load_path}/Models/city_info.json', 'r') as load_file:
+            self.city_info = json.load(load_file)
+        
+        self.GeneralStats_div1_path = f'{input_load_path}/Models/GeneralStats1.txt'
+        self.GeneralStats_div2_path = f'{input_load_path}/Models/GeneralStats2.txt'

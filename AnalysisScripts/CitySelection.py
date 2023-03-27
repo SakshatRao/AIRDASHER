@@ -148,7 +148,7 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
 
         def closest_node(node, nodes):
             dist = np.sum((nodes - node)**2, axis=1)
-            return np.argmin(dist)
+            return np.argsort(dist)
 
         all_cities_coords = preprocessor.city_mapping[preprocessor.city_mapping['City'].isin(cities)]
         all_cities_coords = all_cities_coords['Airport_City_Coords']
@@ -162,16 +162,20 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
 
         for idx, row in preprocessor.tourist_loc_coords_data.iterrows():
             tourist_loc_coord = np.asarray([row['Latitude'], row['Longitude']])
-            closest_idx = closest_node(tourist_loc_coord, all_cities_coords)
-            closest_city = cities[closest_idx]
-            closest_coord = all_cities_coords[closest_idx]
-            closest_dist = geopy.distance.geodesic(tourist_loc_coord, closest_coord).miles
-            factor = distance_factor(closest_dist)
-            tourism_data = preprocessor.monument_visitors_data.loc[idx].values
-            if(closest_city in all_cities_tourism_dict):
-                all_cities_tourism_dict[closest_city] += np.asarray(tourism_data[1:] * factor, dtype = 'float64')
-            else:
-                all_cities_tourism_dict[closest_city] = np.asarray(tourism_data[1:] * factor, dtype = 'float64')
+            sorted_idx = closest_node(tourist_loc_coord, all_cities_coords)
+            for closest_n in range(sorted_idx.shape[0]):
+                closest_idx = sorted_idx[closest_n]
+                closest_city = cities[closest_idx]
+                closest_coord = all_cities_coords[closest_idx]
+                closest_dist = geopy.distance.geodesic(tourist_loc_coord, closest_coord).miles
+                if(closest_dist > 100):
+                    break
+                factor = distance_factor(closest_dist)
+                tourism_data = preprocessor.monument_visitors_data.loc[idx].values
+                if(closest_city in all_cities_tourism_dict):
+                    all_cities_tourism_dict[closest_city] += np.asarray(tourism_data[1:] * factor, dtype = 'float64')
+                else:
+                    all_cities_tourism_dict[closest_city] = np.asarray(tourism_data[1:] * factor, dtype = 'float64')
         tourism_data = pd.DataFrame.from_dict(all_cities_tourism_dict, orient = 'index', columns = preprocessor.monument_visitors_data.columns[1:]).reset_index(drop = False).rename({'index': 'City'}, axis = 1)
         tourism_data['Domestic_tourism_1y_history'] = tourism_data.apply(lambda x: [x['Domestic2018-19'], x['Domestic2019-20'], x['Domestic2020-21'], x['Domestic2021-22']], axis = 1)
         tourism_data['Domestic_tourism_1y_latestyear'] = pd.Series([2021] * tourism_data.shape[0])
@@ -653,6 +657,12 @@ def CitySelection_Script(general_params, preprocessor, tier_1_2_cities_raw, outp
     
     return OrderedDict(most_growth_cities.set_index('City').to_dict(orient = 'index')), AIRPORTS
 
+def shorten_name(name):
+    if(len(name) > 12):
+        return ''.join(name[:10]) + '...'
+    else:
+        return name
+
 def plotly_CitySelection(cities, plot_info, pred_traffic, plotly_save_path):
     
     for city in cities:
@@ -674,7 +684,7 @@ def plotly_CitySelection(cities, plot_info, pred_traffic, plotly_save_path):
         )
         
         fig1.update_layout(
-            title_text = f"Forecasted Total Air-traffic Demand for {city}",
+            title_text = f"Forecasted Total Air-traffic Demand for {shorten_name(city)}",
             height = 700, width = 500,
             paper_bgcolor = '#DBD8FD' , plot_bgcolor = '#DBD8FD',
             titlefont = dict(size = 20),

@@ -53,6 +53,12 @@ tier_1_2_cities = tier_1_2_cities + (
     "Chandigarh, Jammu, Puducherry, Srinagar".split(', ')
 )
 
+def shorten_name(name):
+    if(len(name) > 12):
+        return ''.join(name[:10]) + '...'
+    else:
+        return name
+
 def RouteDevHome(request):
 
     return render(request, 'RouteDev/RouteDevHome.html')
@@ -93,12 +99,15 @@ def CitySelection(request):
                 f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs',
                 f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CitySelection'
             )
-
+            
             CITY_CLASS.objects.all().delete()
             for city in cities:
                 city_params = cities[city]
+                city_info = preprocessor.city_info[city]
                 city_object = CITY_CLASS(
                     NAME = city,
+                    SHORTENED_NAME = shorten_name(city),
+                    INFO = city_info,
                     AIRPORT_NAME = city_params['Airport'],
                     GROWTH_RATE = round(city_params['GrowthRate']),
                     FORECASTED_DEMAND = city_params['PredictedFutureTraffic'],
@@ -119,6 +128,7 @@ def CitySelection(request):
                     airport_object = AIRPORT_CLASS(
                         AIRPORT_NAME = airport,
                         NAME = airport_params['City/Town'],
+                        SHORTENED_NAME = shorten_name(airport_params['City/Town']),
                         IS_HUB = airport_params['IsHub'],
                         LATITUDE = airport_params['Latitude'],
                         LONGITUDE = airport_params['Longitude'],
@@ -289,15 +299,15 @@ def CostResourceAnalysis(request):
     
     def get_route_price_from_market(market_price_in, market_price_out, price_in, price_out):
         if((market_price_in == -1) & (market_price_out == -1)):
-            new_price_in_min = 0
+            new_price_in_min = 5
             new_price_in = 100
             new_price_in_max = 200
-            new_price_out_min = 0
+            new_price_out_min = 5
             new_price_out = 100
             new_price_out_max = 200
         else:
             if(market_price_in == -1):
-                new_price_in_min = 0
+                new_price_in_min = 5
                 new_price_in = 100
                 new_price_in_max = 200
                 new_price_out_min = market_price_out // 2
@@ -307,7 +317,7 @@ def CostResourceAnalysis(request):
                 new_price_in_min = market_price_in // 2
                 new_price_in = price_in
                 new_price_in_max = market_price_in * 3 // 2
-                new_price_out_min = 0
+                new_price_out_min = 5
                 new_price_out = price_out
                 new_price_out_max = 200
             else:
@@ -459,7 +469,7 @@ def CostResourceAnalysis(request):
 
             general_params = GENERAL_PARAMS_CLASS.objects.all()[0]
             general_params_info = general_params.__dict__
-            general_params_info['ANALYSIS_POINTS'] = ast.literal_eval(general_params_info['ANALYSIS_POINTS'])
+            general_params_info['ANALYSIS_POINTS'] = [x-general_params_info['PRESENT_YEAR']-1 for x in ast.literal_eval(general_params_info['ANALYSIS_POINTS'])]
             
             route_params = ROUTE_PARAMS_CLASS.objects.all()[0]
             if(params_changed == False):
@@ -552,11 +562,17 @@ def CostResourceAnalysis(request):
             print("PROBLEM SEEN WITH PLOTLY GRAPHS!")
             pass
     
+    if(len(options) == 0):
+        no_option_returned = True
+    else:
+        no_option_returned = False
+    
     context = {
         'general_param_info': general_params,
         'route_param_info': route_params,
         'selected_route_info': selected_route,
         'options_info': zip(options, options_total_planes_info, options_plane_addition_info, options_feasibility, divs1, divs2, divs3),
+        'no_option_returned': no_option_returned,
         **other_param_options
     }
     return render(request, 'RouteDev/CostResourceAnalysis.html', context)

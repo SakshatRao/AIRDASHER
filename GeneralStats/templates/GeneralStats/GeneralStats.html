@@ -1,0 +1,102 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <title>General Statistics</title>
+        
+        <!-- Leaflet JS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+        <link rel="stylesheet" href="{% static 'RouteDev/Maps/map.css' %}">
+
+        <link rel="stylesheet" href="{% static 'HomePage/colors.css' %}">
+        <link rel="stylesheet" href="{% static 'GeneralStats/GeneralStats.css' %}">
+        
+        <!-- Plotly JS -->
+        <script src="https://cdn.plot.ly/plotly-2.18.2.min.js"></script>
+    </head>
+    
+    <body>
+
+        <div id="all-window">
+            <div id="map-content">
+                <div id="map"></div>
+                <script src="{% static 'RouteDev/Maps/map.js' %}"></script>
+                {% for airport in airports_info %}
+                    <script>
+                        MAPS_PLOT.init_coords("{{ airport.LATITUDE }},{{airport.LONGITUDE}}");
+                        MAPS_PLOT.init_names("{{ airport.NAME }}");
+                        MAPS_PLOT.init_airport_names("{{ airport.AIRPORT_NAME }}");
+                        MAPS_PLOT.init_is_hubs("{{ airport.IS_HUB }}");
+                    </script>
+                {% endfor %}
+                {% for connection in connections_info %}
+                    <script>
+                        MAPS_PLOT.init_routes(
+                            "{{ connection.NODE1.LATITUDE }},{{connection.NODE1.LONGITUDE}}",
+                            "{{ connection.NODE2.LATITUDE }},{{connection.NODE2.LONGITUDE}}"
+                        )
+                    </script>
+                {% endfor %}
+                <script>
+                    MAPS_PLOT.init_zoom_center(3, 22, 105);
+                    MAPS_PLOT.plot_map("{{ general_params_info.SAMPLE_NAME }}", 1, 0, 0);
+                </script>
+            </div>
+            <div id="right-pane">
+                <div id="right-pane-title">
+                    <h1>GENERAL STATISTICS FOR TIER-I/II CITIES AIR CONNECTIVITY</h1>
+                </div>
+                <div id="graphs">
+                    {% autoescape off %}
+                    {{ div1 }}
+                    {{ div2 }}
+                    {% endautoescape %}
+                </div>
+                <div id="graph_info">
+                    <div id="graph-info-table">
+                        <table>
+                            <tr>
+                                <th>Factors</th>
+                                <th>Turbo-Prop</th>
+                                <th>Narrow Body</th>
+                                <th>Wide Body</th>
+                            </tr>
+                            <tr>
+                                <th>Flight Limits</th>
+                                <td>&lt;1000km, &lt;2.5 hrs</td>
+                                <td>&lt;3000km, &lt;5 hrs</td>
+                                <td>&gt;3000km, &gt;5 hrs</td>
+                            </tr>
+                            <tr>
+                                <th>Speed</th>
+                                <td>245 miles/hr</td>
+                                <td>465 miles/hr</td>
+                                <td>468 miles/hr</td>
+                            </tr>
+                            <tr>
+                                <th>Pricing</th>
+                                <td>Underpriced by 2%</td>
+                                <td>Overpriced by 12%</td>
+                                <td>Overpriced by 101%</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div id="graph-info-text">
+                        <h3>TIER-I & TIER-II DIFFERENCE IN CONNECTIVITY:</h3>
+                        <h4>FROM ANY GIVEN INDIAN AIRPORT,<br><br>&bull; NUMBER OF FLIGHTS TO TIER-I CITIES IS <b>230% MORE</b> THAN TO ANY OTHER CITY<br><br>&bull; FOR THE SAME DISTANCE, FLIGHTS TO MAJOR CITIES ARE <b>32% MORE</b> OVERPRICED THAN THOSE TO ANY OTHER CITY</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="back">
+            <a href="{% url 'HomePage:HomePage' %}">
+                <img src="{% static 'HomePage/HomePage_Pics/back.png' %}" alt="Back">
+            </a>
+        </div>
+    
+    </body>
+</html>

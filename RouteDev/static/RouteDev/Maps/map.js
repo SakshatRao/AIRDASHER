@@ -7,6 +7,8 @@ var MAPS_PLOT = MAPS_PLOT || (function(){
     var city_coords = [];
     var city_names = [];
     var main_color = '#2C88D9';
+    var zoom_val = 5;
+    var center = [22, 82.5];
 
     return {
         init_coords : function(coord) {
@@ -32,6 +34,10 @@ var MAPS_PLOT = MAPS_PLOT || (function(){
         },
         init_main_color : function(color) {
             main_color = color
+        },
+        init_zoom_center : function(zoom, center_lat, center_lon) {
+            zoom_val = zoom;
+            center = [center_lat, center_lon];
         },
         plot_map : function(sample_network_name, show_network, show_node_link, show_route_link) {
 
@@ -139,8 +145,8 @@ var MAPS_PLOT = MAPS_PLOT || (function(){
                 valid_layers = [tile_layer, new_cities_layer]
             }
             var map = L.map('map', {
-                center: [22, 85],
-                zoom: 5,
+                center: center,
+                zoom: zoom_val,
                 layers: valid_layers
             });
 

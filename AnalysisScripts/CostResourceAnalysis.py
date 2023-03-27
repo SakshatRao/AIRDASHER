@@ -151,15 +151,20 @@ def CostResourceAnalysis_Script(selected_route, general_params, route_params, pr
         def find_solution(n_narrow, n_turbo, a, b, h, g, f, c):
             return ((a*(n_narrow ** 2)) + (b*(n_turbo ** 2)) + 2*h*n_narrow*n_turbo + 2*g*n_narrow + 2*f*n_turbo + c > 0)
 
+        if(selected_route['DISTANCE'] < 621.371):
+            turboprop_viability = 1
+        else:
+            turboprop_viability = 0
+        
         solutions_in = []
         for n_narrow in np.arange(0, FLEET_NARROWBODY + 1):
-            for n_turbo in np.arange(0, FLEET_TURBOPROP + 1):
+            for n_turbo in np.arange(0, FLEET_TURBOPROP * turboprop_viability + 1):
                 if(find_solution(n_narrow, n_turbo, a_in, b_in, h_in, g_in, f_in, c_in)):
                     solutions_in.append((n_narrow, n_turbo))
 
         solutions_out = []
         for n_narrow in np.arange(0, FLEET_NARROWBODY + 1):
-            for n_turbo in np.arange(0, FLEET_TURBOPROP + 1):
+            for n_turbo in np.arange(0, FLEET_TURBOPROP * turboprop_viability + 1):
                 if(find_solution(n_narrow, n_turbo, a_out, b_out, h_out, g_out, f_out, c_out)):
                     solutions_out.append((n_narrow, n_turbo))
 
@@ -264,15 +269,20 @@ def CostResourceAnalysis_Script(selected_route, general_params, route_params, pr
                 f_out = 365 * (CAPACITY_TURBOPROP) / 2
                 c_out = -MARKET_SHARE_OUT * (DEMAND_OUT_MIN + DEMAND_FULFILMENT_RATE / 100.0 * (DEMAND_OUT_MAX - DEMAND_OUT_MIN))
 
+                if(selected_route['DISTANCE'] < 621.371):
+                    turboprop_viability = 1
+                else:
+                    turboprop_viability = 0
+                
                 solutions_in = []
                 for n_narrow in np.arange(prev_num_narrowbody, FLEET_NARROWBODY + 1):
-                    for n_turbo in np.arange(prev_num_turbo, FLEET_TURBOPROP + 1):
+                    for n_turbo in np.arange(prev_num_turbo, FLEET_TURBOPROP * turboprop_viability + 1):
                         if(find_solution(n_narrow, n_turbo, a_in, b_in, h_in, g_in, f_in, c_in)):
                             solutions_in.append((n_narrow, n_turbo))
 
                 solutions_out = []
                 for n_narrow in np.arange(prev_num_narrowbody, FLEET_NARROWBODY + 1):
-                    for n_turbo in np.arange(prev_num_turbo, FLEET_TURBOPROP + 1):
+                    for n_turbo in np.arange(prev_num_turbo, FLEET_TURBOPROP * turboprop_viability + 1):
                         if(find_solution(n_narrow, n_turbo, a_out, b_out, h_out, g_out, f_out, c_out)):
                             solutions_out.append((n_narrow, n_turbo))
 
@@ -530,20 +540,20 @@ def plotly_CostResourceAnalysis(option_idx, CITY_AIRPORT, HUB_AIRPORT, years, EX
     
     fig3.add_trace(
         go.Line(
+            x = years, y = total_capacities, name = 'Capacity',
+            hovertext = [f"Year: {x}<br>Total Capacity: {y:.1f}" for x, y in zip(years, total_capacities)],
+            hoverinfo = 'text', line = dict(color = '#2C88D9'),
+            fill = 'tozeroy',
+        ),
+        row = 1, col = 1
+    )
+
+    fig3.add_trace(
+        go.Line(
             x = years, y = total_demands, name = 'Demand',
             hovertext = [f"Year: {x}<br>Total Demand: {y:.1f}" for x, y in zip(years, total_demands)],
             hoverinfo = 'text', line = dict(color = '#F7C325'),
             fill = 'tozeroy'
-        ),
-        row = 1, col = 1
-    )
-    
-    fig3.add_trace(
-        go.Line(
-            x = years, y = total_capacities, name = 'Capacity',
-            hovertext = [f"Year: {x}<br>Total Capacity: {y:.1f}" for x, y in zip(years, total_capacities)],
-            hoverinfo = 'text', line = dict(color = '#2C88D9'),
-            fill = 'tonexty',
         ),
         row = 1, col = 1
     )

@@ -380,6 +380,12 @@ def RouteSelection_Script(selected_city, AIRPORTS, general_params, preprocessor,
     
     return route_info_df
 
+def shorten_name(name):
+    if(len(name) > 12):
+        return ''.join(name[:10]) + '...'
+    else:
+        return name
+
 def plotly_RouteSelection(routes, demand_forecasts, plotly_save_path):
     
     for route in routes:
@@ -391,7 +397,7 @@ def plotly_RouteSelection(routes, demand_forecasts, plotly_save_path):
         
         fig1 = make_subplots(
             rows = 2, cols = 1,
-            subplot_titles = [f"{city}→{hub}", f"{hub}→{city}"],
+            subplot_titles = [f"{shorten_name(city)}→{hub}", f"{hub}→{shorten_name(city)}"],
             shared_xaxes = True
         )
         

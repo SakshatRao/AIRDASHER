@@ -2,6 +2,7 @@ from django.db import models
 
 class NEW_AIRPORT_CLASS(models.Model):
     NAME = models.CharField(max_length = 30)
+    SHORTENED_NAME = models.CharField(max_length = 15, default = '')
     INFO = models.CharField(max_length = 100, default = '')
     FORECASTED_DEMAND = models.IntegerField()
     TOURISM_GROWTH = models.IntegerField()

@@ -58,7 +58,7 @@
                     {% for city, div1, div2 in cities_div_info %}
                         <div id="City{{ forloop.counter }}" class="city">
                             <div class="city-title">
-                                <h1>{{ city.NAME }}</h1>
+                                <h1>{{ city.SHORTENED_NAME }}</h1>
                             </div>
                             <div class="city-info">
                                 <h3>GROWTH RATE: {{ city.GROWTH_RATE }}%</h3>
@@ -72,10 +72,10 @@
                                 <div class="modal-content">
                                     <div class="modal-content-info">
                                         <div class="modal-title">
-                                            <h1>{{ city.NAME }}</h1>
+                                            <h1>{{ city.SHORTENED_NAME }}</h1>
                                             <h3>AIRPORT: {{ city.AIRPORT_NAME }}</h3>
                                         </div>
-                                        <h4>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Pariatur, cum, voluptates, hic esse eum iste deleniti obcaecati perspiciatis labore quo atque at explicabo. Quis vitae quam, odio dicta qui reiciendis?</h4>
+                                        <h4>{{ city.INFO }}</h4>
                                         <h3>PASSENGER DEMAND TILL {{ general_params_info.FORECAST_YEAR }} EXPECTED TO GROW BY {{ city.GROWTH_RATE }}%</h3>
                                         <form action="{% url 'RouteDev:RouteSelection' %}" method="post" class="select-city">
                                             {% csrf_token %}

@@ -545,6 +545,12 @@ def NewAirport_Script(general_params, preprocessor, tier_1_2_cities_raw, output_
     
     return OrderedDict(most_growth_cities.set_index('City').to_dict(orient = 'index'))
 
+def shorten_name(name):
+    if(len(name) > 12):
+        return ''.join(name[:10]) + '...'
+    else:
+        return name
+
 def plotly_NewAirports(cities, plot_info, pred_traffic, plotly_save_path):
     
     for city in cities:
@@ -566,7 +572,7 @@ def plotly_NewAirports(cities, plot_info, pred_traffic, plotly_save_path):
         )
         
         fig1.update_layout(
-            title_text = f"Forecasted Total Air-traffic Demand for {city}",
+            title_text = f"Forecasted Total Air-traffic Demand for {shorten_name(city)}",
             height = 700, width = 500,
             paper_bgcolor = '#B8F4EE' , plot_bgcolor = '#B8F4EE',
             titlefont = dict(size = 20),

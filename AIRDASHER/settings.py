@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'RouteDev.apps.RoutedevConfig',
     'HomePage.apps.HomepageConfig',
     'NewAirports.apps.NewairportsConfig',
+    'GeneralStats.apps.GeneralstatsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

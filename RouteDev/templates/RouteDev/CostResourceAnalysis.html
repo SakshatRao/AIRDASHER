@@ -17,6 +17,10 @@
             <div class="options-pane">
                 <h1>FEASIBILITY OF NEW ROUTE</h1>
                 <div class="options">
+                    {% if no_option_returned == True %}
+                        <h2 style="color: var(--red); font-size: 2em;">No Option Found Feasible!</h2>
+                        <h3 style="color: var(--red); font-size: 1.5em;">Demand is not able to be satisfied with given parameters!</h3>
+                    {% endif %}
                     {% for option, option_total_planes, option_plane_addition_info, option_feasibility, div1, div2, div3 in options_info %}
                         <div id="Option{{ forloop.counter }}" class="non-feasible-option option {{ option_feasibility }}-option">
                             <div class="option-title">

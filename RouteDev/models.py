@@ -19,6 +19,7 @@ class GENERAL_PARAMS_CLASS(models.Model):
 
 class CITY_CLASS(models.Model):
     NAME = models.CharField(max_length = 30)
+    SHORTENED_NAME = models.CharField(max_length = 15, default = '')
     INFO = models.CharField(max_length = 100, default = '')
     AIRPORT_NAME = models.CharField(max_length = 3)
     GROWTH_RATE = models.FloatField()
@@ -36,6 +37,7 @@ class CITY_CLASS(models.Model):
 
 class AIRPORT_CLASS(models.Model):
     NAME = models.CharField(max_length = 30)
+    SHORTENED_NAME = models.CharField(max_length = 15, default = '')
     AIRPORT_NAME = models.CharField(max_length = 3)
     IS_HUB = models.BooleanField(default = False)
     LATITUDE = models.FloatField()

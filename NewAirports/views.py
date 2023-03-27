@@ -52,6 +52,12 @@ tier_1_2_cities = tier_1_2_cities + (
     "Chandigarh, Jammu, Puducherry, Srinagar".split(', ')
 )
 
+def shorten_name(name):
+    if(len(name) > 12):
+        return ''.join(name[:10]) + '...'
+    else:
+        return name
+
 def NewAirports(request):
 
     if(request.method == 'POST'):
@@ -82,8 +88,11 @@ def NewAirports(request):
             NEW_AIRPORT_CLASS.objects.all().delete()
             for city in cities:
                 city_params = cities[city]
+                city_info = preprocessor.city_info[city]
                 city_object = NEW_AIRPORT_CLASS(
                     NAME = city,
+                    SHORTENED_NAME = shorten_name(city),
+                    INFO = city_info,
                     FORECASTED_DEMAND = city_params['PredictedFutureTraffic'],
                     TOURISM_GROWTH = round(city_params['GrowthRate']),
                     ECONOMIC_GROWTH = round(city_params['GrowthRate']),
@@ -106,6 +115,7 @@ def NewAirports(request):
             divs1.append(div1)
             divs2.append(div2)
         except:
+            print(city)
             print("PROBLEM SEEN WITH PLOTLY GRAPHS!")
             pass
     
