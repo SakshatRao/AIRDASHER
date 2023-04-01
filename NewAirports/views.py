@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 from RouteDev.models import GENERAL_PARAMS_CLASS
 from .models import NEW_AIRPORT_CLASS
 
-import ast
 from pathlib import Path
 import shutil
 import os
@@ -10,6 +9,7 @@ import os
 from AnalysisScripts.NewAirport import NewAirport_Script
 from AnalysisScripts.PreProcessor import PreProcessor
 
+# Load all tier-I/II cities
 tier_1_2_cities = [
     'Ahmedabad', 'Bengaluru', 'Mumbai', 'Pune', 'Chennai', 'Hyderabad', 'Kolkata', 'Delhi', 'Visakhapatnam', 'Guwahati', 'Patna',
     'Raipur', 'Gurugram', 'Shimla', 'Jamshedpur', 'Thiruvananthapuram', 'Bhopal', 'Bhubaneswar', 'Amritsar', 'Jaipur', 'Lucknow', 'Dehradun'
@@ -52,39 +52,44 @@ tier_1_2_cities = tier_1_2_cities + (
     "Chandigarh, Jammu, Puducherry, Srinagar".split(', ')
 )
 
+# If name is too long, we shorten it to not disturb web UI
 def shorten_name(name):
     if(len(name) > 12):
         return ''.join(name[:10]) + '...'
     else:
         return name
 
+# New Airport Home Page
 def NewAirports(request):
 
-    if(request.method == 'POST'):
+    if(request.method == 'POST'):    # If post data sent to view, that means parameter update was made
 
         NEW_FORECAST_YEAR = int(request.POST['NEW_FORECAST_YEAR'])
         
+        # Check whether parameters have changed
         general_params = GENERAL_PARAMS_CLASS.objects.all()[0]
         forecast_year_unchanged = (NEW_FORECAST_YEAR == general_params.FORECAST_YEAR)
         nothing_changed = forecast_year_unchanged
-        if(nothing_changed == False):
+        
+        if(nothing_changed == False):    # If something has changed
             
+            # Update GENERAL_PARAMS
             general_params.FORECAST_YEAR = NEW_FORECAST_YEAR
             general_params.save()
 
+            # Run NewAirport_Script
             global tier_1_2_cities
             THIS_FOLDER = Path(__file__).parent.resolve()
-            shutil.rmtree(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CitySelection/', ignore_errors = True)
-            os.mkdir(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CitySelection/')
-            preprocessor = PreProcessor(tier_1_2_cities, f'{THIS_FOLDER}/../AnalysisScripts/PreProcessed_Datasets')
+            shutil.rmtree(f'{THIS_FOLDER}/../NewAirports/static/NewAirports/PlotlyGraphs/CitySelection/', ignore_errors = True)
+            os.mkdir(f'{THIS_FOLDER}/../NewAirports/static/NewAirports/PlotlyGraphs/CitySelection/')
+            preprocessor = PreProcessor(f'{THIS_FOLDER}/../AnalysisScripts/PreProcessed_Datasets')
             cities = NewAirport_Script(
                 general_params.__dict__,
                 preprocessor, tier_1_2_cities,
-                f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs',
-                f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CitySelection'
+                f'{THIS_FOLDER}/../NewAirports/static/NewAirports/PlotlyGraphs/CitySelection'
             )
-            print(cities)
 
+            # Save airports
             NEW_AIRPORT_CLASS.objects.all().delete()
             for city in cities:
                 city_params = cities[city]
@@ -103,15 +108,18 @@ def NewAirports(request):
                 )
                 city_object.save()
 
+    # Load all required info for HTML display
     general_params = GENERAL_PARAMS_CLASS.objects.all()[0]
     cities = NEW_AIRPORT_CLASS.objects.all()
+    
+    # Load plotly graphs
     divs1 = []
     divs2 = []
     THIS_FOLDER = Path(__file__).parent.resolve()
     for city in cities:
         try:
-            div1 = open(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CitySelection/{city.NAME}_NewAirports_Graph1.txt', 'r').read()
-            div2 = open(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CitySelection/{city.NAME}_NewAirports_Graph2.txt', 'r').read()
+            div1 = open(f'{THIS_FOLDER}/../NewAirports/static/NewAirports/PlotlyGraphs/CitySelection/{city.NAME}_NewAirports_Graph1.txt', 'r').read()
+            div2 = open(f'{THIS_FOLDER}/../NewAirports/static/NewAirports/PlotlyGraphs/CitySelection/{city.NAME}_NewAirports_Graph2.txt', 'r').read()
             divs1.append(div1)
             divs2.append(div2)
         except:
@@ -119,6 +127,7 @@ def NewAirports(request):
             print("PROBLEM SEEN WITH PLOTLY GRAPHS!")
             pass
     
+    # Send required info to HTML
     context = {
         'general_params_info': general_params,
         'cities_info': cities,

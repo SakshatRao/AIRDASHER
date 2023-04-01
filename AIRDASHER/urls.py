@@ -21,5 +21,6 @@ urlpatterns = [
     path('RouteDev/', include('RouteDev.urls')),
     path('NewAirports/', include('NewAirports.urls')),
     path('GeneralStats/', include('GeneralStats.urls')),
+    path('About/', include('About.urls')),
     path('admin/', admin.site.urls),
 ]

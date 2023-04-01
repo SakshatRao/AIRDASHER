@@ -1,0 +1,58 @@
+{% load static %}
+
+<DOCTYPE html>
+<html>
+
+    <head>
+        <title>About</title>
+        <link rel="stylesheet" href="{% static 'HomePage/colors.css' %}">
+        <link rel="stylesheet" href="{% static 'About/About.css' %}">
+    </head>
+
+    <body>
+        <div id="all-window">
+            <div id="header">
+                <div id="header-title">
+                    <h1>ABOUT AIRDASHER</h1>
+                </div>
+                <div id="header-info">
+                    <div id="header-info-content">
+                        <h3>ANALYTICAL INTELLIGENCE FOR ROUTE DEVELOPMENT AND STRATEGIC HANDLING OF ECONOMIC RESOURCES</h3>
+                    </div>
+                </div>
+            </div>
+            <div id="about-content">
+                <h3>AIRDASHER is my submission for the R² Data Labs Responsible Growth Hack for the theme of "Identification of new air travel routes in emerging markets".</h3>
+                <div id="videos">
+                    <iframe width="640" height="360" src="https://www.youtube.com/embed/DmvTRHIUMjI" title="An Oasis in the City | Poetry" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                    <iframe width="640" height="360" src="https://www.youtube.com/embed/DmvTRHIUMjI" title="An Oasis in the City | Poetry" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+                <h4>Know more about myself & my other works below -</h4>
+                <div id="links">
+                    <a title="GitHub" href="https://github.com/">
+                        <img src="{% static 'About/About_Pics/github_logo.png' %}" alt="GitHub">
+                    </a>
+                    <a title="LinkedIn" href="https://linkedin.com/">
+                        <img src="{% static 'About/About_Pics/linkedin_logo.png' %}" alt="LinkedIn">
+                    </a>
+                    <a title="Personal Portfolio" href="https://sakshatrao.github.io/">
+                        <img src="{% static 'About/About_Pics/favicon.ico' %}" alt="Personal">
+                    </a>
+                    <a title="YouTube" href="https://youtube.com/">
+                        <img src="{% static 'About/About_Pics/youtube_logo.png' %}" alt="Personal">
+                    </a>
+                    <a title="Kaggle" href="https://kaggle.com/">
+                        <img src="{% static 'About/About_Pics/kaggle_logo.png' %}" alt="Personal">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </body>
+
+    <div id="back">
+        <a href="{% url 'HomePage:HomePage' %}">
+            <img src="{% static 'HomePage/HomePage_Pics/back.png' %}" alt="Back">
+        </a>
+    </div>
+
+</html>

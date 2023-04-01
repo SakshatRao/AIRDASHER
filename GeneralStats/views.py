@@ -9,6 +9,7 @@ import os
 from AnalysisScripts.GeneralStats import GeneralStats_Script, Airport
 from AnalysisScripts.PreProcessor import PreProcessor
 
+# Load all tier-I/II cities
 tier_1_2_cities = [
     'Ahmedabad', 'Bengaluru', 'Mumbai', 'Pune', 'Chennai', 'Hyderabad', 'Kolkata', 'Delhi', 'Visakhapatnam', 'Guwahati', 'Patna',
     'Raipur', 'Gurugram', 'Shimla', 'Jamshedpur', 'Thiruvananthapuram', 'Bhopal', 'Bhubaneswar', 'Amritsar', 'Jaipur', 'Lucknow', 'Dehradun'
@@ -51,19 +52,18 @@ tier_1_2_cities = tier_1_2_cities + (
     "Chandigarh, Jammu, Puducherry, Srinagar".split(', ')
 )
 
+# General Stats Page
 def GeneralStats(request):
 
+    # Run GeneralStats_Script
     global tier_1_2_cities
     THIS_FOLDER = Path(__file__).parent.resolve()
-    shutil.rmtree(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CitySelection/', ignore_errors = True)
-    os.mkdir(f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CitySelection/')
-    preprocessor = PreProcessor(tier_1_2_cities, f'{THIS_FOLDER}/../AnalysisScripts/PreProcessed_Datasets')
+    preprocessor = PreProcessor(f'{THIS_FOLDER}/../AnalysisScripts/PreProcessed_Datasets')
     airports = GeneralStats_Script(
-        preprocessor, tier_1_2_cities,
-        f'{THIS_FOLDER}/../RouteDev/static/RouteDev/ProcessingOutputs',
-        f'{THIS_FOLDER}/../RouteDev/static/RouteDev/PlotlyGraphs/CitySelection'
+        preprocessor, tier_1_2_cities
     )
 
+    # Save all airports
     AIRPORT_CLASS.objects.all().delete()
     for airport in airports:
         airport_params = airports[airport].airport_info
@@ -75,7 +75,8 @@ def GeneralStats(request):
             LONGITUDE = airport_params['Longitude'],
         )
         airport_object.save()
-        
+
+    # Save all routes        
     CONNECTION_CLASS.objects.all().delete()
     connections_made = []
     all_airport_objects = AIRPORT_CLASS.objects.all()
@@ -93,10 +94,13 @@ def GeneralStats(request):
                 connection.TWO_WAY_FLIGHT = True
             connection.save()
 
+    # Fetch all required info for HTML
     airports = AIRPORT_CLASS.objects.all()
     connections = CONNECTION_CLASS.objects.filter(TWO_WAY_FLIGHT = False)
     THIS_FOLDER = Path(__file__).parent.resolve()
-    preprocessor = PreProcessor(tier_1_2_cities, f'{THIS_FOLDER}/../AnalysisScripts/PreProcessed_Datasets')
+    preprocessor = PreProcessor(f'{THIS_FOLDER}/../AnalysisScripts/PreProcessed_Datasets')
+
+    # Fetch plotly graphs
     div1 = ''
     div2 = ''
     try:
@@ -106,6 +110,7 @@ def GeneralStats(request):
         print("PROBLEM SEEN WITH PLOTLY GRAPHS!")
         pass
     
+    # Send required info to HTML
     context = {
         'airports_info': airports,
         'connections_info': connections,

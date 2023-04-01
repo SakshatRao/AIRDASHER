@@ -42,6 +42,7 @@ body {
     justify-content: center;
     align-items: center;
     margin: 0 0;
+    width: 100%;
 }
 
 #header-info-content {
@@ -56,8 +57,16 @@ body {
     margin: 0 1%;
 }
 
-#header-info-content img {
+#header-info-content a {
     width: 2%;
+}
+
+#header-info-content a:hover {
+    cursor: pointer;
+}
+
+#header-info-content img {
+    width: 100%;
 }
 
 #cards {

@@ -98,21 +98,23 @@
                     {% csrf_token %}
                     <div id="params-config">
                         <div class="param-config">
-                            <label>FORECAST YEAR:</label>
-                            <input type="number" name="NEW_FORECAST_YEAR" id="FORECAST_YEAR" value="{{ general_params_info.FORECAST_YEAR }}" min="2023" max="2043" step="1">
+                            <label title="Select year till which forecasts are made" class="param_help">FORECAST YEAR:</label>
+                            <input type="number" name="NEW_FORECAST_YEAR" id="FORECAST_YEAR" value="{{ general_params_info.FORECAST_YEAR }}" min="2025" max="2043" step="1">
                         </div>
                         <div class="param-config">
-                            <label>ROUTE TYPE:</label>
+                            <label title="Select whether new routes should be made to only hubs of network or any airport" class="param_help">ROUTE TYPE:</label>
                             <select id="ONLY_HUBS" name="NEW_ONLY_HUBS">
                                 <option value="False" {% if general_params_info.ONLY_HUBS == False %}selected{% endif %}>TO ANY AIRPORT</option>
                                 <option value="True" {% if general_params_info.ONLY_HUBS == True %}selected{% endif %}>ONLY TO HUBS</option>
                             </select>      
                         </div>
                         <div class="param-config">
-                            <label>Sample:</label>
+                            <label title="Select sample network to develop new routes for" class="param_help">SAMPLE:</label>
                             <select id="SAMPLE_NAME" name="NEW_SAMPLE_NAME" value="{{ general_params_info.SAMPLE_NAME }}">
-                                <option value="Sample1">Sample 1</option>
-                            </select>      
+                                <option value="AirAsia_India" {% if general_params_info.SAMPLE_NAME == "AirAsia_India" %}selected{% endif %}>Air Asia India</option>
+                                <option value="Akasa_Air" {% if general_params_info.SAMPLE_NAME == "Akasa_Air" %}selected{% endif %}>Akasa Air</option>
+                                <option value="Star_Air" {% if general_params_info.SAMPLE_NAME == "Star_Air" %}selected{% endif %}>Star Air</option>
+                            </select>
                         </div>
                     </div>
                     <div id="params-submit">

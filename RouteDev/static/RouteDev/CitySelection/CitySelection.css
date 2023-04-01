@@ -227,3 +227,7 @@ body {
 #back a img {
     width: 100%;
 }
+
+.param_help:hover {
+    cursor: help;
+}

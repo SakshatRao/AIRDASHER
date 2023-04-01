@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'HomePage.apps.HomepageConfig',
     'NewAirports.apps.NewairportsConfig',
     'GeneralStats.apps.GeneralstatsConfig',
+    'About.apps.AboutConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

@@ -75,7 +75,7 @@
                 <div class="params-pane">
                     <div class="price-params">
                         <div class="price-params-title">
-                            <h2>FARE SELECTION</h2>
+                            <h2 title="Select the fare for flight" class="param_help">FARE SELECTION</h2>
                         </div>
                         <div class="price-params-panes">
                             <div class="price-params-panes-content">
@@ -97,15 +97,15 @@
                     <div class="cost-fleet-panes">
                         <div class="cost-pane">
                             <h2>COST PARAMETERS</h2>
-                            <h4>Total Fixed Costs:</h4>
+                            <h4 title="Fixed costs for a turboprop flight like cost price (for narrowbody, cost is assumed to be proportional to capacity)" class="param_help">Total Fixed Costs:</h4>
                             <h6>(for Turboprop)</h6>
-                            <span class="currencyinput">$<input type="number" name="NEW_FIXED_COST" value="{{ general_param_info.FIXED_COST }}" step="100000" id="FIXED_COST"></span>
-                            <h4>Total Operating Costs:</h4>
+                            <span class="currencyinput">$<input type="number" name="NEW_FIXED_COST" value="{{ general_param_info.FIXED_COST }}" min="0" step="100000" id="FIXED_COST"></span>
+                            <h4 title="Operating costs for turboprop flight per hour like fuel & staff (for narrowbody, cost is assumed to be proportional to capacity)" class="param_help">Total Operating Costs:</h4>
                             <h6>(for Turboprop per hour)</h6>
-                            <span class="currencyinput">$<input type="number" name="NEW_OPERATING_COST" value="{{ general_param_info.OPERATING_COST }}" step="100" id="OPERATING_COST"></span>
-                            <h4>Total Other Costs:</h4>
-                            <span class="currencyinput">$<input type="number" name="NEW_OTHER_COST" value="{{ general_param_info.OTHER_COST }}" step="10000" id="OTHER_COST"></span>
-                            <h4>Minimum Profit<br>Margin Expected:</h4>
+                            <span class="currencyinput">$<input type="number" name="NEW_OPERATING_COST" value="{{ general_param_info.OPERATING_COST }}" min="0" step="10" id="OPERATING_COST"></span>
+                            <h4 title="Other one-time costs not dependant on number of flights like marketing & fees" class="param_help">Total Other Costs:</h4>
+                            <span class="currencyinput">$<input type="number" name="NEW_OTHER_COST" value="{{ general_param_info.OTHER_COST }}" min="0" step="10000" id="OTHER_COST"></span>
+                            <h4 title="Minimum profit margin expected for this route" class="param_help">Minimum Profit<br>Margin Expected:</h4>
                             <span class="currencyinput"><input type="number" name="NEW_MIN_PROFIT_MARGIN" value="{{ general_param_info.MIN_PROFIT_MARGIN }}" step="1" id="MIN_PROFIT_MARGIN"></span>
                         </div>
                         <div class="fleet-pane">
@@ -114,17 +114,17 @@
                                 <div class="fleet-subpane">
                                     <img src="{% static 'RouteDev/RouteDev_Pics/narrowbody.png' %}" alt="Narrowbody">
                                     <h4>NARROWBODY</h4>
-                                    <h3>CAPACITY:</h3>
+                                    <h3 title="Capacity of a narrowbody flight" class="param_help">CAPACITY:</h3>
                                     <input type="number" name="NEW_CAPACITY_NARROWBODY" value="{{ general_param_info.CAPACITY_NARROWBODY }}" min="0" max="500" step="20" id="CAPACITY_NARROWBODY">
-                                    <h3>AVAILABILITY:</h3>
+                                    <h3 title="Number of turboprop flights within the airline's fleet" class="param_help">AVAILABILITY:</h3>
                                     <input type="number" name="NEW_FLEET_NARROWBODY" value="{{ general_param_info.FLEET_NARROWBODY }}" min="0" max="10" step="1" id="FLEET_NARROWBODY">
                                 </div>
                                 <div class="fleet-subpane">
                                     <img src="{% static 'RouteDev/RouteDev_Pics/turboprop.png' %}" alt="Turboprop">
                                     <h4>TURBOPROP</h4>
-                                    <h3>CAPACITY:</h3>
+                                    <h3 title="Capacity of a turboprop flight" class="param_help">CAPACITY:</h3>
                                     <input type="number" name="NEW_CAPACITY_TURBOPROP" value="{{ general_param_info.CAPACITY_TURBOPROP }}" min="0" max="500" step="20" id="CAPACITY_TURBOPROP">
-                                    <h3>AVAILABILITY:</h3>
+                                    <h3 title="Number of turboprop flights within the airline's fleet" class="param_help">AVAILABILITY:</h3>
                                     <input type="number" name="NEW_FLEET_TURBOPROP" value="{{ general_param_info.FLEET_TURBOPROP }}" min="0" max="10" step="1" id="FLEET_TURBOPROP">
                                 </div>
                             </div>
@@ -132,15 +132,15 @@
                     </div>
                     <div class="other-param-pane">
                         <div class="analysis-window">
-                            <h3>ANALYSIS POINTS:</h3>
-                            <input type="text" name="NEW_ANALYSIS_POINTS" value="{{ general_param_info.ANALYSIS_POINTS }}" id="ANALYSIS_POINTS">
+                            <h3 title="For which years do we analyze again and add aircrafts if required" class="param_help">ANALYSIS POINTS:</h3>
+                            <input type="text" name="NEW_ANALYSIS_POINTS" value="{{ general_param_info.ANALYSIS_POINTS }}" pattern="^\[\s*(?:\d{4}\s*(?:,\s*\d{4}\s*){0,})?\s*\]$" title="List of years: [2025, 2027]" id="ANALYSIS_POINTS">
                         </div>
                         <div class="demand-fulfilment-rate">
-                            <h3>DEMAND FULFILLMENT RATE:</h3>
+                            <h3 title="What minimum demand (as a percentage of maximum demand) should be fulfilled" class="param_help">DEMAND FULFILLMENT RATE:</h3>
                             <input type="number" name="NEW_DEMAND_FULFILMENT_RATE" value="{{ general_param_info.DEMAND_FULFILMENT_RATE }}" min="0" max="100" id="DEMAND_FULFILMENT_RATE">
                         </div>
                         <div class="inflation-rate">
-                            <h3>INFLATION RATE:</h3>
+                            <h3 title="Select the inflation rate to be factored in for future costs" class="param_help">INFLATION RATE:</h3>
                             <input type="number" name="NEW_INFLATION_RATE" value="{{ general_param_info.INFLATION_RATE }}" min="1" max="20" id="INFLATION_RATE">
                         </div>
                     </div>
