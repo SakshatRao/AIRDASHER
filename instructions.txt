@@ -1,0 +1,13 @@
+Create separate conda environments for both repos using requirements.txt within each repo
+
+R2_Data_Labs_Hackathon Repo:
+1. Remove PreProcessed_Datasets folder (since we want to generate all preprocessed datasets & outputs again)
+2. Run following notebooks to save model weights, variables & graphs
+   a. CitySelection_SaveModel.ipynb
+   b. RouteSelection_SaveModel.ipynb
+   c. GeneralStats.ipynb
+
+AIRDASHER Repo:
+1. Copy the PreProcessed_Datasets/ folder in R2_Data_Labs_Hackathon repo to Analysis_Scripts/ in AIRDASHER repo. You should eventually have a folder AnalysisScripts/PreProcessed_Datasets/ in AIRDASHER repo
+2. In terminal, within AIRDASHER folder, run “python manage.py runserver”
+3. Open the development server to be able to access the locally hosted website
