@@ -7,6 +7,12 @@ This is my submission for the <a href="https://www.hackerearth.com/challenges/ha
 ## Demo Video - https://youtu.be/_wftrsszOh0
 ### Secondary GitHub repo - https://github.com/SakshatRao/R2_Data_Labs_Hackathon
 
+![alt text](Documents/AIRDASHER_Pic1.jpg "Title")
+![alt text](Documents/AIRDASHER_Pic2.jpg "Title")
+![alt text](Documents/AIRDASHER_Pic3.jpg "Title")
+![alt text](Documents/AIRDASHER_Pic4.jpg "Title")
+![alt text](Documents/AIRDASHER_Pic5.jpg "Title")
+
 ### Brief
 
 Rapidly developing economies, affordable flight pricings & post-pandemic revival of air traffic have provided airlines with an opportunity to capitalize on increasing demand for air travel. To make well-informed decisions about extending their network & introducing new flights, direct customer feedback is useful but difficult, time-consuming & expensive to collect. In such cases, city-wise macro-economic data could be a useful solution to forecast air travel demand in the long-term.

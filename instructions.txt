@@ -1,6 +1,7 @@
 Create separate conda environments for both repos using requirements.txt within each repo
+(Check instruction.txt for the other repo for additional steps while creating its environment)
 
-R2_Data_Labs_Hackathon Repo:
+R2_Data_Labs_Hackathon Repo: (Optional)
 1. Remove PreProcessed_Datasets folder (since we want to generate all preprocessed datasets & outputs again)
 2. Run following notebooks to save model weights, variables & graphs
    a. CitySelection_SaveModel.ipynb
